@@ -2,9 +2,10 @@
 # Project Part A: Single Player Infexion
 
 from .utils import render_board
+from .types import BoardState, Action
+from .node import Node
 
-
-def search(input: dict[tuple, tuple]) -> list[tuple]:
+def search(input: BoardState) -> list[Action]:
     """
     This is the entry point for your submission. The input is a dictionary
     of board cell states, where the keys are tuples of (r, q) coordinates, and
@@ -18,6 +19,32 @@ def search(input: dict[tuple, tuple]) -> list[tuple]:
     # board state in a human-readable format. Try changing the ansi argument 
     # to True to see a colour-coded version (if your terminal supports it).
     print(render_board(input, ansi=False))
+
+    current_board_state = input
+    graph: list[Node] = []
+    # Initialise graph with the first action
+    first_node = Node()
+    # ...
+    while True:
+        if len(graph) == 0:
+            return []
+        curr_node = graph.pop(0)
+        for red_coor in find_red_coordinates(curr_node.state):
+            for action in find_possible_actions(curr_node.state, red_coor):
+                updated_board_state = update_board_state(curr_node.state, action)
+                new_node = Node(updated_board_state, curr_node.actions, curr_node.cost + 1)
+                graph.append(new_node)
+        
+        # Check if graph is empty - goal state cannot be reached
+        if is_goal_reached(curr_node.state):
+           return curr_node.actions
+
+        # Pop head of queue
+
+
+
+
+
 
     # Here we're returning "hardcoded" actions for the given test.csv file.
     # Of course, you'll need to replace this with an actual solution...
