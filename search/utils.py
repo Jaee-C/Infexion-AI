@@ -1,6 +1,9 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
+from .types import BoardState
+from .constants import COLOR, RED
+
 def apply_ansi(str, bold=True, color=None):
     """
     Wraps a string with ANSI control codes to enable basic terminal-based
@@ -73,3 +76,16 @@ def render_board(board: dict[tuple, tuple], ansi=False) -> str:
             output += "    "
         output += "\n"
     return output
+
+def find_red_coordinates(state: BoardState) -> list[tuple[int, int]]:
+    """
+    Given a board, find all the coordinates in the board.
+    Returns a lists of (r, q) coordinates that corresponds to red cells 
+    in the given board.
+    """
+    red_coordinates = []
+    for coord in state:
+        if state[coord][COLOR] == RED:
+            red_coordinates.append(coord)
+
+    return red_coordinates

@@ -1,7 +1,7 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
-from .utils import render_board
+from .utils import render_board, find_red_coordinates
 from .types import BoardState, Action
 from .node import Node
 

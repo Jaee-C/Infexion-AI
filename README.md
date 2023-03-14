@@ -6,7 +6,7 @@ python -m search < test.csv
 ```
 
 ## TODO
-* [ ] [WJ] `find_red_coordinates()`
+* [x] [WJ] `find_red_coordinates()`
   * input:
     * `BoardState` current board state
   * output:
