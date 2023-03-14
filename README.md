@@ -11,7 +11,7 @@ python -m search < test.csv
     * `BoardState` current board state
   * output:
     * `list[(r, q)]` list of coordinates of red pieces
-* [ ] [WJ] `find_possible_actions()`
+* [x] [WJ] `find_possible_actions()`
   * input: 
     * `BoardState` current board state
     * `(r, q)` coordinate of piece to find actions of
@@ -24,7 +24,7 @@ python -m search < test.csv
     * `Action` action to be taken
   * output
     * `BoardState` updated board state (after action taken)
-* [ ] [XY] `is_goal_reached()`
+* [x] [XY] `is_goal_reached()`
   * input
     * `BoardState` current board state
   * output
