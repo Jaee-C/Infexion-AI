@@ -1,8 +1,8 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
-from .types import BoardState
-from .constants import COLOR, RED
+from .types import Action, BoardState
+from .constants import COLOR, RED, DIRECTIONS
 
 def apply_ansi(str, bold=True, color=None):
     """
@@ -77,11 +77,18 @@ def render_board(board: dict[tuple, tuple], ansi=False) -> str:
         output += "\n"
     return output
 
+
 def find_red_coordinates(state: BoardState) -> list[tuple[int, int]]:
     """
     Given a board, find all the coordinates in the board.
     Returns a lists of (r, q) coordinates that corresponds to red cells 
     in the given board.
+
+    Arguments:
+    state -- current state of the game board
+
+    Returns:
+    List of coordinates on the board which contains red pieces
     """
     red_coordinates = []
     for coord in state:
@@ -89,3 +96,27 @@ def find_red_coordinates(state: BoardState) -> list[tuple[int, int]]:
             red_coordinates.append(coord)
 
     return red_coordinates
+
+
+def find_possible_actions(state: BoardState, coordinate: tuple[int, int]) -> list[Action]:
+    """
+    Find all the possible SPREAD actions that Red can make given a coordinate
+    of a red cell. Returns a list of `Actions` that can be made.
+
+    For each red cell, the red player can make 6 different SPREAD moves, in the
+    6 directions of the cell.
+
+    Arguments:
+    state -- current state of the game board
+    coordinate -- the coordinate of the piece to find actions of
+
+    Returns:
+    A list of possible actions to take from `coordinate`
+    """
+    action_list: list[Action] = []
+
+    for direction in DIRECTIONS:
+        action_list.append(coordinate + DIRECTIONS[direction])
+    
+    return action_list
+
