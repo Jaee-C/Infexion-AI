@@ -2,7 +2,7 @@
 # Project Part A: Single Player Infexion
 
 from .types import Action, BoardState
-from .constants import COLOR, RED, DIRECTIONS
+from .constants import COLOR, RED, BLUE, DIRECTIONS
 
 def apply_ansi(str, bold=True, color=None):
     """
@@ -120,3 +120,16 @@ def find_possible_actions(state: BoardState, coordinate: tuple[int, int]) -> lis
     
     return action_list
 
+
+def is_goal_reached(state: BoardState) -> bool:
+    """
+    Determine if the agent has reached the goal state. There are no blue cells
+    on the board.
+
+    Arguments:
+    state -- current state of the game board
+    """
+    for color, _ in state.values():
+        if color == BLUE:
+            return False
+    return True

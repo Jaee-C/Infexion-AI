@@ -1,7 +1,7 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
-from .utils import render_board, find_red_coordinates, find_possible_actions
+from .utils import render_board, find_red_coordinates, find_possible_actions, is_goal_reached
 from .types import BoardState, Action, Node
 
 def search(input: BoardState) -> list[Action]:
