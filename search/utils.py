@@ -150,20 +150,20 @@ def update_board_states(state: BoardState, action: Action) -> BoardState:
     The updated board state.
     """
     (r, q, dr, dq) = action
-    (spread_colour, spread_power) = state[(r, q)]
+    new_state = state.copy()
+    (spread_colour, spread_power) = new_state[(r, q)]
     
     # Empty the current cell
-    del state[(r, q)]
+    del new_state[(r, q)]
 
     # Update the power of the cell that is being spread to
     for i in range(1, spread_power + 1):
         current_cell = ((r + dr * i) % BOARD_BOUNDARY, (q + dq * i) % BOARD_BOUNDARY)
-        new_power = state[current_cell][POWER] + 1 if current_cell in state else 1
+        new_power = new_state[current_cell][POWER] + 1 if current_cell in new_state else 1
 
         # Empty the cell if it has reached max power
         if new_power == MAX_POWER:
-            state.pop(current_cell)
+            new_state.pop(current_cell)
         else:
-            state[current_cell] = (spread_colour, new_power)
-
-    return state
+            new_state[current_cell] = (spread_colour, new_power)
+    return new_state
