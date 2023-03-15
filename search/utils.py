@@ -2,7 +2,7 @@
 # Project Part A: Single Player Infexion
 
 from .types import Action, BoardState
-from .constants import COLOR, RED, BLUE, DIRECTIONS
+from .constants import BOARD_BOUNDARY, COLOR, MAX_POWER, POWER, RED, BLUE, DIRECTIONS
 
 def apply_ansi(str, bold=True, color=None):
     """
@@ -128,8 +128,42 @@ def is_goal_reached(state: BoardState) -> bool:
 
     Arguments:
     state -- current state of the game board
+
+    Returns:
+    `True` if the goal state is reached (ie. all pieces on board are Red), `False` otherwise.
     """
     for color, _ in state.values():
         if color == BLUE:
             return False
     return True
+
+
+def update_board_states(state: BoardState, action: Action) -> BoardState:
+    """
+    Update the board state given an action.
+
+    Arguments:
+    state -- current state of the game board
+    action -- the action to be taken
+
+    Returns:
+    The updated board state.
+    """
+    (r, q, dr, dq) = action
+    (spread_colour, spread_power) = state[(r, q)]
+    
+    # Empty the current cell
+    del state[(r, q)]
+
+    # Update the power of the cell that is being spread to
+    for i in range(1, spread_power + 1):
+        current_cell = ((r + dr * i) % BOARD_BOUNDARY, (q + dq * i) % BOARD_BOUNDARY)
+        new_power = state[current_cell][POWER] + 1 if current_cell in state else 1
+
+        # Empty the cell if it has reached max power
+        if new_power == MAX_POWER:
+            state.pop(current_cell)
+        else:
+            state[current_cell] = (spread_colour, new_power)
+
+    return state

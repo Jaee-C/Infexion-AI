@@ -19,3 +19,9 @@ DIRECTIONS: dict[str, tuple[int, int]] = {
     "BOTTOM_LEFT": (-1, 0),
     "BOTTOM_RIGHT": (0, 1)
 }
+
+# Maximum power of a cell
+MAX_POWER = 6
+
+# Board boundary
+BOARD_BOUNDARY = 7
