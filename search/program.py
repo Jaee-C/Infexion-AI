@@ -1,6 +1,7 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
+from .xy_utils import update_board_state, is_goal_reached
 from .utils import render_board
 from .types import BoardState, Action
 from .node import Node
