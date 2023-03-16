@@ -6,6 +6,7 @@ python -m search < test.csv
 ```
 
 ## TODO
+### Initial Functions with Uninformed Search (BFS)
 * [x] [WJ] `find_red_coordinates()`
   * input:
     * `BoardState` current board state
@@ -18,7 +19,7 @@ python -m search < test.csv
   * output: 
     * `list[Action]` list of possible actions for red to take 
   * to be called for each red piece on board
-* [ ] [XY] `update_board_state()`
+* [x] [XY] `update_board_state()`
   * input
     * `BoardState` current board state
     * `Action` action to be taken
@@ -30,3 +31,17 @@ python -m search < test.csv
   * output
     * `boolean` true if goal reached, otherwise false
 * [x] BFS 
+
+### Using Informed Search (A*)
+* [ ] [WJ] Update `search()` with `heapq` and `A*`
+  * insert nodes into min heap based on estimated cost
+* [ ] `evaluation_function()`
+  * $f(x) = c(x) + d(x) + r(x)$
+  * $c(x)$ cost to current node
+  * [ ] [XY] $d(x)$ `distance_to_blues()`
+    * minimum manhattan distance between red and blue cells within the current board
+  * [ ] [WJ] $r(x)$ `red_power()`
+    * current red power
+  * 
+> * idea for future: travelling salesman
+>   * each red going to multiple blue (path)
