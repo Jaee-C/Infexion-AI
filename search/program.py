@@ -29,16 +29,17 @@ def search(input: BoardState) -> list[Action]:
         
         # Pop head of queue
         curr_node = graph.pop(0)
+        
+        # Check if graph is empty - goal state cannot be reached
+        if is_goal_reached(curr_node.state):
+            return curr_node.actions
 
         # Find all red coordinates and the possible actions that red can take
         for red_coor in find_red_coordinates(curr_node.state):
             for action in find_possible_actions(curr_node.state, red_coor):
                 updated_board_state = update_board_states(curr_node.state, action)
-                new_node = Node(updated_board_state, curr_node.actions, curr_node.cost + 1)
+                new_node = Node(updated_board_state, curr_node.actions.copy(), curr_node.cost + 1)
                 new_node.actions.append(action)
                 new_node.print_node()
                 graph.append(new_node)
         
-        # Check if graph is empty - goal state cannot be reached
-        if is_goal_reached(curr_node.state):
-           return curr_node.actions

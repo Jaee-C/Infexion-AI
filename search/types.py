@@ -14,6 +14,6 @@ class Node():
         self.actions = actions
         self.cost = cost
     def print_node(self):
-        print(f"\n- State: {self.state}\n- Actions: {self.actions}\n- Cost: {self.cost}")
+        print(f"- Actions: {self.actions}\n- Cost: {self.cost}")
         from .utils import render_board
         print(render_board(self.state, ansi=False))
