@@ -1,7 +1,7 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
-from .utils import render_board, find_red_coordinates, find_possible_actions, is_goal_reached, update_board_states
+from .utils import render_board, find_colour_coordinates, find_possible_actions, is_goal_reached, update_board_states
 from .types import BoardState, Action, Node
 
 def search(input: BoardState) -> list[Action]:
@@ -35,7 +35,7 @@ def search(input: BoardState) -> list[Action]:
             return curr_node.actions
 
         # Find all red coordinates and the possible actions that red can take
-        for red_coor in find_red_coordinates(curr_node.state):
+        for red_coor in find_colour_coordinates(curr_node.state, "r"):
             for action in find_possible_actions(curr_node.state, red_coor):
                 updated_board_state = update_board_states(curr_node.state, action)
                 new_node = Node(updated_board_state, curr_node.actions.copy(), curr_node.cost + 1)

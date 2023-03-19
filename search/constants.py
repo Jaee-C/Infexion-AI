@@ -1,4 +1,7 @@
 # Index of keys in BoardState
+import sys
+
+
 COLOR = 0
 POWER = 1
 
@@ -25,3 +28,5 @@ MAX_POWER = 6
 
 # Board boundary
 BOARD_BOUNDARY = 7
+
+MAX_INT = sys.maxsize

@@ -38,10 +38,10 @@ python -m search < test.csv
 * [ ] `evaluation_function()`
   * $f(x) = c(x) + d(x) + r(x)$
   * $c(x)$ cost to current node
-  * [ ] [XY] $d(x)$ `distance_to_blues()`
+  * [x] [XY] $d(x)$ `distance_to_blues()`
     * minimum manhattan distance between red and blue cells within the current board
   * [ ] [WJ] $r(x)$ `red_power()`
     * current red power
-  * 
+
 > * idea for future: travelling salesman
 >   * each red going to multiple blue (path)

@@ -1,6 +1,9 @@
 # BoardState:
 # - key: coordinate - (r, q)
 # - value: cell state - (color, power)
+from .utils import get_distance
+
+
 BoardState = dict[tuple, tuple]
 
 # Action:
@@ -14,6 +17,7 @@ class Node():
         self.actions = actions
         self.cost = cost
         self.estimated_cost = self.evaluation_function()
+
     def print_node(self):
         """
         Print the node's state, actions and cost
@@ -21,5 +25,6 @@ class Node():
         print(f"- Actions: {self.actions}\n- Cost: {self.cost}")
         from .utils import render_board
         print(render_board(self.state, ansi=False))
+
     def evaluation_function(self) -> int:
-        return self.cost + distance_to_blues(self.state) + red_power(self.state)
+        return self.cost + get_distance(self.state) + red_power(self.state)

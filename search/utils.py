@@ -2,7 +2,7 @@
 # Project Part A: Single Player Infexion
 
 from .types import Action, BoardState
-from .constants import BOARD_BOUNDARY, COLOR, MAX_POWER, POWER, RED, BLUE, DIRECTIONS
+from .constants import BOARD_BOUNDARY, COLOR, MAX_INT, MAX_POWER, POWER, RED, BLUE, DIRECTIONS
 
 def apply_ansi(str, bold=True, color=None):
     """
@@ -78,7 +78,7 @@ def render_board(board: dict[tuple, tuple], ansi=False) -> str:
     return output
 
 
-def find_red_coordinates(state: BoardState) -> list[tuple[int, int]]:
+def find_colour_coordinates(state: BoardState, colour: str) -> list[tuple[int, int]]:
     """
     Given a board, find all the coordinates in the board.
     Returns a lists of (r, q) coordinates that corresponds to red cells 
@@ -86,13 +86,14 @@ def find_red_coordinates(state: BoardState) -> list[tuple[int, int]]:
 
     Arguments:
     state -- current state of the game board
+    colour -- either "r" or "b"
 
     Returns:
     List of coordinates on the board which contains red pieces
     """
     red_coordinates = []
     for coord in state:
-        if state[coord][COLOR] == RED:
+        if state[coord][COLOR] == colour:
             red_coordinates.append(coord)
 
     return red_coordinates
@@ -167,3 +168,35 @@ def update_board_states(state: BoardState, action: Action) -> BoardState:
         else:
             new_state[current_cell] = (spread_colour, new_power)
     return new_state
+
+def min_diff(a: int, b: int) -> int:
+    """
+    Get the minimum difference between two numbers on a circular array. Used to calculate manhattan distance of two coordinates on a board.
+
+    Example:
+    distance between 0 and 6 on a circular array of size 7 is 1, not 6.
+
+    first diff = 6
+    ┍-----┷-----┑
+    0 1 2 3 4 5 6 0 1 2 3 4 5 6
+                ┕┯┙
+            second diff = 1
+    """
+    NUM_ARR = [i for i in range (0, BOARD_BOUNDARY)] * 2
+    first_diff = abs(a - b)
+    a_index_alt = NUM_ARR.index(a, b)
+    second_diff = abs(a_index_alt - b)
+    return min(first_diff, second_diff)
+
+def get_distance(state: BoardState) -> int:
+    """
+    Sums the distance to the nearest red cell for each blue cell on the board.
+    """
+    total_distance = 0
+    for blue in find_colour_coordinates(state, "b"):
+        min_distance = MAX_INT  
+        for red in find_colour_coordinates(state, "r"):
+            curr_distance = min_diff(blue[0], red[0]) + min_diff(blue[1], red[1])
+            if curr_distance < total_distance:
+                min_distance = curr_distance
+    return min_distance
