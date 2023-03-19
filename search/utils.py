@@ -1,6 +1,7 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
+from numpy import sign
 from .types import Action, BoardState
 from .constants import BOARD_BOUNDARY, COLOR, MAX_INT, MAX_POWER, POWER, RED, BLUE, DIRECTIONS
 
@@ -169,10 +170,10 @@ def update_board_states(state: BoardState, action: Action) -> BoardState:
             new_state[current_cell] = (spread_colour, new_power)
     return new_state
 
-def min_diff(a: int, b: int) -> int:
+def circular_min_diff(a: int, b: int) -> int:
     """
     Get the minimum difference between two numbers on a circular array. Used to calculate manhattan distance of two coordinates on a board.
-
+    
     Example:
     distance between 0 and 6 on a circular array of size 7 is 1, not 6.
 
@@ -182,21 +183,42 @@ def min_diff(a: int, b: int) -> int:
                 ┕┯┙
             second diff = 1
     """
-    NUM_ARR = [i for i in range (0, BOARD_BOUNDARY)] * 2
     first_diff = abs(a - b)
-    a_index_alt = NUM_ARR.index(a, b)
-    second_diff = abs(a_index_alt - b)
+    second_diff = abs(min(a, b) + BOARD_BOUNDARY - max(a, b))
     return min(first_diff, second_diff)
 
 def get_distance(state: BoardState) -> int:
     """
     Sums the distance to the nearest red cell for each blue cell on the board.
+
+    Arguments:
+    state -- current state of the game board
+
+    Returns:
+    The sum of the distance to the nearest red cell for each blue cell on the board.
     """
     total_distance = 0
     for blue in find_colour_coordinates(state, "b"):
         min_distance = MAX_INT  
         for red in find_colour_coordinates(state, "r"):
-            curr_distance = min_diff(blue[0], red[0]) + min_diff(blue[1], red[1])
+            diff_r = blue[0] - red[0]
+            diff_q = blue[1] - red[1]
+
+            # If the difference in r and q are the same sign, then the distance is the absolute value of the difference
+            # Otherwise, the distance is the minimum difference between the two coordinates
+            curr_distance = abs(diff_q + diff_r) if sign(diff_r) == sign(diff_q) else max(circular_min_diff(blue[0], red[0]), circular_min_diff(blue[1], red[1]))
+            
+            # Update the minimum distance
             if curr_distance < total_distance:
                 min_distance = curr_distance
-    return min_distance
+        total_distance += min_distance
+    return total_distance
+
+def red_power(state: BoardState) -> int:
+    """
+    Sums the power of all red cells on the board.
+    """
+    total_power = 0
+    for red in find_colour_coordinates(state, "r"):
+        total_power += state[red][POWER]
+    return total_power
