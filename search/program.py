@@ -1,8 +1,11 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
+import heapq
+
 from .utils import render_board, find_colour_coordinates, find_possible_actions, is_goal_reached, update_board_states
-from .types import BoardState, Action, Node
+from .types import BoardState, Action
+from .node import Node
 
 def search(input: BoardState) -> list[Action]:
     """
@@ -21,6 +24,7 @@ def search(input: BoardState) -> list[Action]:
 
     # Initialise graph with the first action
     graph: list[Node] = [Node(input, [], 0)]
+    heapq.heappush(graph, Node(input, [], 0))
 
     while True:
         # Check if graph is empty - goal state cannot be reached
@@ -28,9 +32,9 @@ def search(input: BoardState) -> list[Action]:
             return []
         
         # Pop head of queue
-        curr_node = graph.pop(0)
+        curr_node = heapq.heappop(graph)
         
-        # Check if graph is empty - goal state cannot be reached
+        # Check if goal state is reached
         if is_goal_reached(curr_node.state):
             return curr_node.actions
 
@@ -41,5 +45,4 @@ def search(input: BoardState) -> list[Action]:
                 new_node = Node(updated_board_state, curr_node.actions.copy(), curr_node.cost + 1)
                 new_node.actions.append(action)
                 new_node.print_node()
-                graph.append(new_node)
-        
+                heapq.heappush(graph, new_node)
