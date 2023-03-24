@@ -1,4 +1,4 @@
-from .utils import render_board, get_distance, red_power
+from .utils import render_board, get_distance
 from .types import BoardState, Action
 
 class Node():

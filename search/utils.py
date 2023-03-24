@@ -213,12 +213,3 @@ def get_distance(state: BoardState) -> int:
                 min_distance = curr_distance
         total_distance += min_distance
     return total_distance
-
-def red_power(state: BoardState) -> int:
-    """
-    Sums the power of all red cells on the board.
-    """
-    total_power = 0
-    for red in find_colour_coordinates(state, "r"):
-        total_power += state[red][POWER]
-    return total_power
