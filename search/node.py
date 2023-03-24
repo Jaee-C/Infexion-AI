@@ -16,7 +16,7 @@ class Node():
         print(render_board(self.state, ansi=False))
 
     def evaluation_function(self) -> int:
-        return self.cost + get_distance(self.state) + red_power(self.state)
+        return self.cost + get_distance(self.state)
 
     def __lt__(self, other: object) -> bool:
         return self.estimated_cost < other.estimated_cost
