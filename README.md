@@ -45,3 +45,11 @@ python -m search < test.csv
 
 > * idea for future: travelling salesman
 >   * each red going to multiple blue (path)
+
+## Testing
+
+`test1.csv`: Wrap around
+`test2.csv`: Capture in reverse direction first [NOT OPTIMAL]
+`test3.csv`: 6 equidistant, with only one optimal move
+
+Question: Why is estimated_cost crazy high???
