@@ -33,15 +33,15 @@ python -m search < test.csv
 * [x] BFS 
 
 ### Using Informed Search (A*)
-* [ ] [WJ] Update `search()` with `heapq` and `A*`
+* [x] [WJ] Update `search()` with `heapq` and `A*`
   * insert nodes into min heap based on estimated cost
-* [ ] `evaluation_function()`
-  * $f(x) = c(x) + d(x) + r(x)$
+* [x] `evaluation_function()`
+  * $f(x) = c(x) + d(x) + 2*b(x)$
   * $c(x)$ cost to current node
   * [x] [XY] $d(x)$ `distance_to_blues()`
     * minimum manhattan distance between red and blue cells within the current board
-  * [ ] [WJ] $r(x)$ `red_power()`
-    * current red power
+  * [x] [XY] $b(x)$
+    * current blue power
 
 > * idea for future: travelling salesman
 >   * each red going to multiple blue (path)
