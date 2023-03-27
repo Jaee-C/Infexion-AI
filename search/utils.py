@@ -200,7 +200,6 @@ def get_distance(state: BoardState) -> int:
     total_distance = 0
     for blue in find_colour_coordinates(state, "b"):
         min_distance = MAX_INT
-        red_power = 0
         for red in find_colour_coordinates(state, "r"):
             diff_r = blue[0] - red[0]
             diff_q = blue[1] - red[1]
@@ -210,9 +209,24 @@ def get_distance(state: BoardState) -> int:
             curr_distance = abs(diff_q + diff_r) if sign(diff_r) == sign(diff_q) else max(circular_min_diff(blue[0], red[0]), circular_min_diff(blue[1], red[1]))
             
             # Update the minimum distance
-            if curr_distance < total_distance:
+            if curr_distance < min_distance:
                 min_distance = curr_distance
-                red_power = state[red][POWER]
-        total_distance += min_distance - red_power
+        total_distance += min_distance
     
     return total_distance
+
+def get_colour_power(state: BoardState, colour: str) -> int:
+    """
+    Sums the power of all `colour` cells on the board.
+
+    Arguments:
+    state -- current state of the game board
+    colour -- either "r" or "b"
+
+    Returns:
+    The sum of the power of all `colour` cells on the board.
+    """
+    total_power = 0
+    for blue in find_colour_coordinates(state, colour):
+        total_power += state[blue][POWER]
+    return total_power

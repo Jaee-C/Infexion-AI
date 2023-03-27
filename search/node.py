@@ -1,4 +1,4 @@
-from .utils import render_board, get_distance
+from .utils import get_colour_power, render_board, get_distance
 from .types import BoardState, Action
 
 class Node():
@@ -12,11 +12,16 @@ class Node():
         """
         Print the node's state, actions and cost
         """
-        print(f"- Actions: {self.actions}\n- Cost: {self.cost}")
+        print(f"- Actions: {self.actions}\n- Cost: {self.cost}\n- Estimated Cost: {self.estimated_cost}")
         print(render_board(self.state, ansi=False))
 
     def evaluation_function(self) -> int:
-        return self.cost + get_distance(self.state)
+        return self.cost + get_distance(self.state) + 2*get_colour_power(self.state, "b")
 
     def __lt__(self, other: object) -> bool:
         return self.estimated_cost < other.estimated_cost
+    
+    def __str__(self):
+        return f"({self.estimated_cost},{len(self.actions)})"
+    def __repr__(self):
+        return f"({self.estimated_cost},{len(self.actions)})"

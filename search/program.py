@@ -23,7 +23,7 @@ def search(input: BoardState) -> list[Action]:
     print(render_board(input, ansi=False))
 
     # Initialise graph with the first action
-    graph: list[Node] = [Node(input, [], 0)]
+    graph: list[Node] = []
     heapq.heappush(graph, Node(input, [], 0))
 
     while True:
@@ -33,11 +33,12 @@ def search(input: BoardState) -> list[Action]:
         
         # Pop head of queue
         curr_node = heapq.heappop(graph)
-        print(curr_node.estimated_cost)
+        curr_node.print_node()
+        graph: list[Node] = []
 
         # Check if goal state is reached
         if is_goal_reached(curr_node.state):
-            print_final_moves(input, curr_node.actions)
+            # print_final_moves(input, curr_node.actions)
             return curr_node.actions
 
         # Find all red coordinates and the possible actions that red can take
@@ -47,6 +48,7 @@ def search(input: BoardState) -> list[Action]:
                 new_node = Node(updated_board_state, curr_node.actions.copy(), curr_node.cost + 1)
                 new_node.actions.append(action)
                 heapq.heappush(graph, new_node)
+                # print(f"{action}, {new_node.estimated_cost}: {graph}")
 
 """
 Debug function to show the moves our search algorithm made
