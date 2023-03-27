@@ -34,6 +34,8 @@ def search(input: BoardState) -> list[Action]:
         # Pop head of queue
         curr_node = heapq.heappop(graph)
         curr_node.print_node()
+
+        # Reset the graph to only contain nodes that are children of the current node
         graph: list[Node] = []
 
         # Check if goal state is reached
