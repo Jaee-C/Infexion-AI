@@ -36,7 +36,7 @@ def search(input: BoardState) -> list[Action]:
         curr_node.print_node()
 
         # Reset the graph to only contain nodes that are children of the current node
-        graph: list[Node] = []
+        # graph: list[Node] = []
 
         # Check if goal state is reached
         if is_goal_reached(curr_node.state):
