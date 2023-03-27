@@ -3,7 +3,7 @@
 
 import heapq
 
-from .utils import render_board, find_colour_coordinates, find_possible_actions, is_goal_reached, update_board_states
+from .utils import render_board, find_colour_coordinates, find_possible_actions, is_goal_reached, update_board_states, get_distance
 from .types import BoardState, Action
 from .node import Node
 
@@ -33,14 +33,14 @@ def search(input: BoardState) -> list[Action]:
         
         # Pop head of queue
         curr_node = heapq.heappop(graph)
-        curr_node.print_node()
+        # curr_node.print_node()
 
         # Reset the graph to only contain nodes that are children of the current node
         # graph: list[Node] = []
 
         # Check if goal state is reached
         if is_goal_reached(curr_node.state):
-            # print_final_moves(input, curr_node.actions)
+            print_final_moves(input, curr_node.actions)
             return curr_node.actions
 
         # Find all red coordinates and the possible actions that red can take
