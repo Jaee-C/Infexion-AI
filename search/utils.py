@@ -199,7 +199,8 @@ def get_distance(state: BoardState) -> int:
     """
     total_distance = 0
     for blue in find_colour_coordinates(state, "b"):
-        min_distance = MAX_INT  
+        min_distance = MAX_INT
+        red_power = 0
         for red in find_colour_coordinates(state, "r"):
             diff_r = blue[0] - red[0]
             diff_q = blue[1] - red[1]
@@ -211,5 +212,7 @@ def get_distance(state: BoardState) -> int:
             # Update the minimum distance
             if curr_distance < total_distance:
                 min_distance = curr_distance
-        total_distance += min_distance
+                red_power = state[red][POWER]
+        total_distance += min_distance - red_power
+    
     return total_distance
