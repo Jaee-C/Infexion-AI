@@ -26,6 +26,8 @@ def search(input: BoardState) -> list[Action]:
     graph: list[Node] = []
     heapq.heappush(graph, Node(input, [], 0))
 
+    nodes_visited = 0  # debug info to check time complexity of algorithm
+
     while True:
         # Check if graph is empty - goal state cannot be reached
         if len(graph) == 0:
@@ -33,6 +35,7 @@ def search(input: BoardState) -> list[Action]:
         
         # Pop head of queue
         curr_node = heapq.heappop(graph)
+        nodes_visited += 1
         # curr_node.print_node()
 
         # Reset the graph to only contain nodes that are children of the current node
@@ -41,6 +44,7 @@ def search(input: BoardState) -> list[Action]:
         # Check if goal state is reached
         if is_goal_reached(curr_node.state):
             print_final_moves(input, curr_node.actions)
+            print(f"Nodes visited: {nodes_visited}")
             return curr_node.actions
 
         # Find all red coordinates and the possible actions that red can take

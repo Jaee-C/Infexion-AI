@@ -48,8 +48,11 @@ python -m search < test.csv
 
 ## Testing
 
-`test1.csv`: Wrap around
-`test2.csv`: Capture in reverse direction first [NOT OPTIMAL]
-`test3.csv`: 6 equidistant, with only one optimal move
-
-Question: Why is estimated_cost crazy high???
+`test1.csv`: Wrap around - 2 moves
+`test2.csv`: Capture in reverse direction first - 3 moves
+`test3.csv`: 6 equidistant, with only one optimal move - 1 move
+`test4.csv`: 3 moves
+`test5.csv`: Another wrap around - 2 moves
+`test6.csv`: Go through a path - 6 moves
+`test7.csv`: very sparse - 4 moves
+  - Weakness of our heuristic: if graph is sparse, and we are not making much captures, search devolves into a BFS

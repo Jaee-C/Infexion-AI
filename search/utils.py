@@ -216,6 +216,27 @@ def get_distance(state: BoardState) -> int:
             # Update the minimum distance, assuming each move can have a SPREAD power of 6 (relaxed problem)
             if curr_distance // 6 + curr_bend + 1 < min_distance:
                 min_distance = curr_distance // 6 + curr_bend + 1
+
+        # We also consider shortest distance from blue cells too -- red cells can capture blue cells and move from those positions, don't need to count an extra "bend"
+        for blue2 in find_colour_coordinates(state, "b"):
+            if blue == blue2:
+                pass
+
+            diff_r = blue[0] - blue2[0]
+            diff_q = blue[1] - blue2[1]
+
+            # SPREAD cannot perform turns, so an extra move is needed when a turn is required
+            curr_bend = 0
+            if not in_straight_line(blue2, blue):
+                curr_bend = 1
+
+            # If the difference in r and q are the same sign, then the distance is the absolute value of the difference
+            # Otherwise, the distance is the minimum difference between the two coordinates
+            curr_distance = abs(diff_q + diff_r) if sign(diff_r) == sign(diff_q) else max(circular_min_diff(blue[0], blue2[0]), circular_min_diff(blue[1], blue2[1]))
+
+            # Update the minimum distance, assuming each move can have a SPREAD power of 6 (relaxed problem)
+            if curr_distance // 6 + curr_bend + 1 < min_distance:
+                min_distance = curr_distance // 6 + curr_bend + 1
         total_distance += min_distance
     
     return total_distance
