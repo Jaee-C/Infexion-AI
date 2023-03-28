@@ -7,7 +7,7 @@ from .utils import render_board, find_colour_coordinates, find_possible_actions,
 from .types import BoardState, Action
 from .node import Node
 
-def search(input: BoardState) -> list[Action]:
+def search(input: BoardState, debug_mode:int="") -> list[Action]:
     """
     This is the entry point for your submission. The input is a dictionary
     of board cell states, where the keys are tuples of (r, q) coordinates, and
@@ -20,7 +20,7 @@ def search(input: BoardState) -> list[Action]:
     # The render_board function is useful for debugging -- it will print out a 
     # board state in a human-readable format. Try changing the ansi argument 
     # to True to see a colour-coded version (if your terminal supports it).
-    print(render_board(input, ansi=False))
+    # print(render_board(input, ansi=False))
 
     # Initialise graph with the first action
     graph: list[Node] = []
@@ -36,15 +36,12 @@ def search(input: BoardState) -> list[Action]:
         # Pop head of queue
         curr_node = heapq.heappop(graph)
         nodes_visited += 1
-        # curr_node.print_node()
-
-        # Reset the graph to only contain nodes that are children of the current node
-        # graph: list[Node] = []
+        if debug_mode >= 2: curr_node.print_node()
 
         # Check if goal state is reached
         if is_goal_reached(curr_node.state):
-            print_final_moves(input, curr_node.actions)
-            print(f"Nodes visited: {nodes_visited}")
+            if debug_mode >= 3: print_final_moves(input, curr_node.actions)
+            print(f"Nodes visited: {nodes_visited}, Cost: {curr_node.cost}")
             return curr_node.actions
 
         # Find all red coordinates and the possible actions that red can take
@@ -54,7 +51,7 @@ def search(input: BoardState) -> list[Action]:
                 new_node = Node(updated_board_state, curr_node.actions.copy(), curr_node.cost + 1)
                 new_node.actions.append(action)
                 heapq.heappush(graph, new_node)
-                # print(f"{action}, {new_node.estimated_cost}: {graph}")
+                if debug_mode >= 3: print(f"{action}, {new_node.estimated_cost}: {graph}")
 
 """
 Debug function to show the moves our search algorithm made

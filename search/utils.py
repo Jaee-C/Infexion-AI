@@ -217,10 +217,10 @@ def get_distance(state: BoardState) -> int:
             if curr_distance // 6 + curr_bend + 1 < min_distance:
                 min_distance = curr_distance // 6 + curr_bend + 1
 
-        # We also consider shortest distance from blue cells too -- red cells can capture blue cells and move from those positions, don't need to count an extra "bend"
+        # We also consider shortest distance between blue cells too -- red cells can capture blue cells and move from those positions, don't need to count an extra "bend"
         for blue2 in find_colour_coordinates(state, "b"):
             if blue == blue2:
-                pass
+                continue
 
             diff_r = blue[0] - blue2[0]
             diff_q = blue[1] - blue2[1]

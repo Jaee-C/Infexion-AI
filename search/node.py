@@ -16,7 +16,8 @@ class Node():
         print(render_board(self.state, ansi=False))
 
     def evaluation_function(self) -> int:
-        return self.cost + get_distance(self.state)
+        return self.cost + get_distance(self.state) 
+    # - get_colour_power(self.state, "r")
         # return self.cost + len(find_colour_coordinates(self.state, "b"))
         # return self.cost + get_distance(self.state) + 2*get_colour_power(self.state, "b")
 
