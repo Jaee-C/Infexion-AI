@@ -1,7 +1,5 @@
-----------------------gs_test1.csv
+----------------------test.csv
 Nodes visited: 23, Cost: 5
-----------------------gs_test2.csv
-Nodes visited: 26, Cost: 3
 ----------------------test1.csv
 Nodes visited: 3, Cost: 2
 ----------------------test2.csv
@@ -16,3 +14,7 @@ Nodes visited: 4, Cost: 2
 Nodes visited: 30, Cost: 6
 ----------------------test7.csv
 Nodes visited: 52, Cost: 5
+----------------------gs_test1.csv
+Nodes visited: 23, Cost: 5
+----------------------gs_test2.csv
+Nodes visited: 26, Cost: 3
