@@ -58,6 +58,7 @@ python -m search < test.csv
   - Weakness of our heuristic: if graph is sparse, and we are not making much captures, search devolves into a BFS
 
 ## Heuristic Testing
+* run tester using `py tester.py`
 * `self.cost + get_distance(self.state)`
   * output in [`./tests/results/out1.txt`](./tests/results/out1.txt)
   ```

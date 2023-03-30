@@ -1,49 +1,18 @@
 ----------------------gs_test1.csv
 Nodes visited: 17, Cost: 5
-SPREAD 5 6 1 -1
-SPREAD 0 4 1 -1
-SPREAD 1 3 0 -1
-SPREAD 1 2 1 0
-SPREAD 2 2 1 0
 ----------------------gs_test2.csv
 Nodes visited: 12, Cost: 3
-SPREAD 1 4 1 0
-SPREAD 2 4 0 -1
-SPREAD 2 1 -1 0
 ----------------------test1.csv
 Nodes visited: 3, Cost: 2
-SPREAD 1 6 0 1
-SPREAD 1 0 0 1
 ----------------------test2.csv
 Nodes visited: 6, Cost: 4
-SPREAD 1 3 0 1
-SPREAD 1 4 1 -1
-SPREAD 4 1 -1 1
-SPREAD 3 2 -1 0
 ----------------------test3.csv
 Nodes visited: 2, Cost: 1
-SPREAD 5 3 -1 0
 ----------------------test4.csv
 Nodes visited: 4, Cost: 3
-SPREAD 2 1 1 0
-SPREAD 4 1 -1 1
-SPREAD 2 3 0 1
 ----------------------test5.csv
 Nodes visited: 3, Cost: 2
-SPREAD 0 2 -1 0
-SPREAD 3 6 0 1
 ----------------------test6.csv
 Nodes visited: 7, Cost: 6
-SPREAD 3 0 0 1
-SPREAD 3 2 1 -1
-SPREAD 3 3 -1 1
-SPREAD 0 6 0 1
-SPREAD 0 1 1 -1
-SPREAD 2 4 -1 0
 ----------------------test7.csv
 Nodes visited: 49, Cost: 5
-SPREAD 4 4 -1 1
-SPREAD 3 5 -1 0
-SPREAD 2 5 -1 1
-SPREAD 1 6 0 1
-SPREAD 1 0 0 1

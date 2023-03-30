@@ -3,7 +3,7 @@ from search.program import search
 import sys
 
 orig_stdout = sys.stdout
-f = open('./tests/results/out2b.txt', 'w')
+f = open('./tests/results/out1.txt', 'w')
 sys.stdout = f
 
 FILEPATH_PREFIX = './tests/'
@@ -11,7 +11,7 @@ for file in ['gs_test1.csv', 'gs_test2.csv', 'test1.csv', 'test2.csv', 'test3.cs
     with open(f"{FILEPATH_PREFIX}{file}", 'r') as f:
         print(f"----------------------{file}")
         input = parse_input(f.read())
-        sequence: list[tuple] = search(input, 2)
+        sequence: list[tuple] = search(input, 0)
         # print_sequence(sequence)
 
 sys.stdout = orig_stdout
