@@ -22,19 +22,19 @@ def search(input: BoardState) -> list[Action]:
     # to True to see a colour-coded version (if your terminal supports it).
     # print(render_board(input, ansi=False))
 
-    # Initialise graph with the first action
-    graph: list[Node] = []
-    heapq.heappush(graph, Node(input, [], 0))
+    # Initialise tree with the first action
+    tree: list[Node] = []
+    heapq.heappush(tree, Node(input, [], 0))
 
     nodes_visited = 0  # debug info to check time complexity of algorithm
 
     while True:
-        # Check if graph is empty - goal state cannot be reached
-        if len(graph) == 0:
+        # Check if tree is empty - goal state cannot be reached
+        if len(tree) == 0:
             return []
         
         # Pop head of queue
-        curr_node = heapq.heappop(graph)
+        curr_node = heapq.heappop(tree)
         nodes_visited += 1
 
         # Check if goal state is reached
@@ -48,7 +48,7 @@ def search(input: BoardState) -> list[Action]:
                 updated_board_state = update_board_states(curr_node.state, action)
                 new_node = Node(updated_board_state, curr_node.actions.copy(), curr_node.cost + 1)
                 new_node.actions.append(action)
-                heapq.heappush(graph, new_node)
+                heapq.heappush(tree, new_node)
 
 
 def print_final_moves(input: BoardState, actions: list[Action]):
