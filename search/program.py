@@ -26,8 +26,6 @@ def search(input: BoardState) -> list[Action]:
     tree: list[Node] = []
     heapq.heappush(tree, Node(input, [], 0))
 
-    nodes_visited = 0  # debug info to check time complexity of algorithm
-
     while True:
         # Check if tree is empty - goal state cannot be reached
         if len(tree) == 0:
@@ -35,11 +33,9 @@ def search(input: BoardState) -> list[Action]:
         
         # Pop head of queue
         curr_node = heapq.heappop(tree)
-        nodes_visited += 1
 
         # Check if goal state is reached
         if is_goal_reached(curr_node.state):
-            # print(f"Nodes visited: {nodes_visited}, Cost: {curr_node.cost}")
             return curr_node.actions
 
         # Find all red coordinates and the possible actions that red can take
@@ -49,13 +45,3 @@ def search(input: BoardState) -> list[Action]:
                 new_node = Node(updated_board_state, curr_node.actions.copy(), curr_node.cost + 1)
                 new_node.actions.append(action)
                 heapq.heappush(tree, new_node)
-
-
-def print_final_moves(input: BoardState, actions: list[Action]):
-    """
-    Debug function to show the moves our search algorithm made
-    """
-    curr_state = input
-    for a in actions:
-        curr_state = update_board_states(curr_state, a)
-        print(render_board(curr_state))
