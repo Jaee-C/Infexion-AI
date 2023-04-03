@@ -3,7 +3,7 @@
 
 from numpy import sign
 from .types import Action, BoardState
-from .constants import BOARD_BOUNDARY, COLOR, MAX_INT, MAX_POWER, POWER, RED, BLUE, DIRECTIONS
+from .constants import BOARD_BOUNDARY, COLOR, MAX_INT, MAX_POWER, POWER, BLUE, DIRECTIONS
 
 def apply_ansi(str, bold=True, color=None):
     """
@@ -172,7 +172,8 @@ def update_board_states(state: BoardState, action: Action) -> BoardState:
 
 def circular_min_diff(a: int, b: int) -> int:
     """
-    Get the minimum difference between two numbers on a circular array. Used to calculate manhattan distance of two coordinates on a board.
+    Get the minimum difference between two numbers on a circular array. 
+    Used to calculate manhattan distance of two coordinates on a board.
     
     Example:
     distance between 0 and 6 on a circular array of size 7 is 1, not 6.
@@ -187,73 +188,55 @@ def circular_min_diff(a: int, b: int) -> int:
     second_diff = abs(min(a, b) + BOARD_BOUNDARY - max(a, b))
     return min(first_diff, second_diff)
 
-def get_distance(state: BoardState) -> int:
+def get_num_spreads(state: BoardState) -> int:
     """
-    Sums the distance to the nearest red cell for each blue cell on the board.
+    Sums the minimum number of SPREAD actions from each blue cell to any other cell.
 
     Arguments:
     state -- current state of the game board
 
     Returns:
-    The sum of the distance to the nearest red cell for each blue cell on the board.
+    The sum of the minimum number of SPREAD actions from each blue cell to any other cell.
     """
-    total_distance = 0
-    for blue in find_colour_coordinates(state, "b"):
-        min_distance = MAX_INT
-        for red in find_colour_coordinates(state, "r"):
-            diff_r = blue[0] - red[0]
-            diff_q = blue[1] - red[1]
-
-            # SPREAD cannot perform turns, so an extra move is needed when a turn is required
-            curr_bend = 0
-            if not in_straight_line(red, blue):
-                curr_bend = 1
-
-            # If the difference in r and q are the same sign, then the distance is the absolute value of the difference
-            # Otherwise, the distance is the minimum difference between the two coordinates
-            curr_distance = abs(diff_q + diff_r) if sign(diff_r) == sign(diff_q) else max(circular_min_diff(blue[0], red[0]), circular_min_diff(blue[1], red[1]))
-
-            # Update the minimum distance, assuming each move can have a SPREAD power of 6 (relaxed problem)
-            if curr_distance // 6 + curr_bend + 1 < min_distance:
-                min_distance = curr_distance // 6 + curr_bend + 1
-
-        # We also consider shortest distance between blue cells too -- red cells can capture blue cells and move from those positions, don't need to count an extra "bend"
-        for blue2 in find_colour_coordinates(state, "b"):
-            if blue == blue2:
+    total_spreads = 0
+    for blue in find_colour_coordinates(state, BLUE):
+        min_spreads = MAX_INT
+        for other in state:
+            if blue == other:
                 continue
-
-            diff_r = blue[0] - blue2[0]
-            diff_q = blue[1] - blue2[1]
+            diff_r = blue[0] - other[0]
+            diff_q = blue[1] - other[1]
 
             # SPREAD cannot perform turns, so an extra move is needed when a turn is required
             curr_bend = 0
-            if not in_straight_line(blue2, blue):
+            if not in_straight_line(other, blue):
                 curr_bend = 1
 
             # If the difference in r and q are the same sign, then the distance is the absolute value of the difference
             # Otherwise, the distance is the minimum difference between the two coordinates
-            curr_distance = abs(diff_q + diff_r) if sign(diff_r) == sign(diff_q) else max(circular_min_diff(blue[0], blue2[0]), circular_min_diff(blue[1], blue2[1]))
+            curr_distance = abs(diff_q + diff_r) if sign(diff_r) == sign(diff_q) else max(circular_min_diff(blue[0], other[0]), circular_min_diff(blue[1], other[1]))
 
             # Update the minimum distance, assuming each move can have a SPREAD power of 6 (relaxed problem)
-            if curr_distance // 6 + curr_bend + 1 < min_distance:
-                min_distance = curr_distance // 6 + curr_bend + 1
-        total_distance += min_distance
-    
-    return total_distance
+            if curr_distance // 6 + curr_bend + 1 < min_spreads:
+                min_spreads = curr_distance // 6 + curr_bend + 1
 
-def in_straight_line(red, blue):
+        total_spreads += min_spreads
+    
+    return total_spreads
+
+def in_straight_line(cell1: tuple[int, int], cell2: tuple[int, int]) -> bool:
     """
-    Check if the red and blue cells are in a straight line.
+    Check if cell1 and cell2 are in a straight line.
 
     Arguments:
-    red -- coordinate of the red cell
-    blue -- coordinate of the blue cell
+    cell1 -- coordinate of the first cell
+    cell2 -- coordinate of the second cell
 
     Returns:
-    `True` if the red and blue cells are in a straight line, `False` otherwise.
+    `True` if both cell1 and cell2 are in a straight line, `False` otherwise.
     """
-    diff_r = blue[0] - red[0]
-    diff_q = blue[1] - red[1]
+    diff_r = cell2[0] - cell1[0]
+    diff_q = cell2[1] - cell1[1]
     return diff_r == 0 or diff_q == 0 or diff_r == diff_q or diff_r == -diff_q
 
 def get_colour_power(state: BoardState, colour: str) -> int:
@@ -268,6 +251,6 @@ def get_colour_power(state: BoardState, colour: str) -> int:
     The sum of the power of all `colour` cells on the board.
     """
     total_power = 0
-    for blue in find_colour_coordinates(state, colour):
-        total_power += state[blue][POWER]
+    for cell in find_colour_coordinates(state, colour):
+        total_power += state[cell][POWER]
     return total_power

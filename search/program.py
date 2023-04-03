@@ -3,7 +3,7 @@
 
 import heapq
 
-from .utils import render_board, find_colour_coordinates, find_possible_actions, is_goal_reached, update_board_states, get_distance
+from .utils import render_board, find_colour_coordinates, find_possible_actions, is_goal_reached, update_board_states
 from .types import BoardState, Action
 from .node import Node
 
