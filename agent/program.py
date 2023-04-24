@@ -3,6 +3,7 @@
 
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
+from .types import BoardState
 
 
 # This is the entry point for your game playing agent. Currently the agent
@@ -17,6 +18,7 @@ class Agent:
         Initialise the agent.
         """
         self._color = color
+        self._state: BoardState = {}
         match color:
             case PlayerColor.RED:
                 print("Testing: I am playing as red")
