@@ -3,6 +3,7 @@
 
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
+from referee.game.hex import HexDir
 from .types import BoardState
 
 
@@ -56,6 +57,31 @@ class Agent:
     
     def find_possible_actions(self, b: BoardState) -> list[Action]:
         return []
+    
+    def find_spread_actions(self, color: PlayerColor) -> list[Action]:
+        """
+        Find all the possible SPREAD actions that Red can make given a coordinate
+        of a red cell. Returns a list of `Actions` that can be made.
+
+        For each red cell, the red player can make 6 different SPREAD moves, in the
+        6 directions of the cell.
+
+        Arguments:
+        state -- current state of the game board
+        coordinate -- the coordinate of the piece to find actions of
+
+        Returns:
+        A list of possible actions to take from `coordinate`
+        """
+        action_list: list[Action] = []
+
+        for coords, cell in self._state.items():
+            if cell[0] == color:
+                for direction in HexDir:
+                    new_action = Action(coords, direction)
+                    action_list.append(new_action)
+        
+        return action_list
     
     def minimax(self, b:BoardState, depth:int, is_max:bool) -> tuple[Action, int]:
         if depth == 0:

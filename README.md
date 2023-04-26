@@ -6,7 +6,7 @@ ToDos (24/4)
 - [ ] Implement Minimax
     - [ ] `terminal_test(b: BoardState) -> bool` check if game has ended -- Use Board.winner_color()
     - [ ] [XY] `find_possible_actions(b: BoardState) -> list[Action]` Find all possible actions from current state (SPREAD/SPAWN)optimizing minimax algorithm
-      - [ ] [WJ]`find_spread_actions(b: BoardState) -> list[Action]`
+      - [x] [WJ]`find_spread_actions(b: BoardState) -> list[Action]`
         - migrate from part A
       - [ ] [XY] `find_spawn_actions(b: BoardState) -> list[Action]`
         - start with only returning 1 spawn action (first available spawn position)
@@ -18,7 +18,7 @@ ToDos (24/4)
         - Note: function only needs to show ordering of states (which is better which is worse), does not need to be admissible
     - [ ] determine max tree depth
       - 3 for now
-    - [ ] [WJ] `minimax(b: BoardState, depth:int, is_max:bool) -> (Action, Cost)`
+    - [x] [WJ] `minimax(b: BoardState, depth:int, is_max:bool) -> (Action, Cost)`
         ```py3
         def minimax(b:BoardState, depth:int, is_max:bool) -> (Action, Cost):
             if depth == 0:
