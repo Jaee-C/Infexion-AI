@@ -47,3 +47,39 @@ class Agent:
             case SpreadAction(cell, direction):
                 print(f"Testing: {color} SPREAD from {cell}, {direction}")
                 pass
+
+    def evaluate_value(self, b: BoardState) -> int:
+        return
+    
+    def terminal_test(self, b: BoardState) -> PlayerColor:
+        return
+    
+    def find_possible_actions(self, b: BoardState) -> list[Action]:
+        return []
+    
+    def minimax(self, b:BoardState, depth:int, is_max:bool) -> tuple[Action, int]:
+        if depth == 0:
+                return None, self.evaluate_value(b)
+        winner=self.terminal_test(b)
+        if winner != None:
+            return None, float('inf') if winner == self.color else float('-inf') # pos or neg depending on ismax or not
+
+        curr_max = float('-inf')
+        curr_min = float('inf')
+        best_action = None
+        for action in self.find_possible_actions(b):
+            b.apply_action(action)
+            _, val = self.minimax(b, depth-1, not is_max)
+            if is_max:
+                curr_max = max(val, curr_max)
+                best_action = action
+            else:
+                curr_min = min(val, curr_min)
+                best_action = action
+            b.undo_action()
+        
+        if is_max:
+            cost = curr_max
+        else:
+            const = curr_min
+        return best_action, cost
