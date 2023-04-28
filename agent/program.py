@@ -22,6 +22,7 @@ class Agent:
         """
         self._color = color
         self._state: BoardState = {}
+        self._prev_state: BoardState = {}
         match color:
             case PlayerColor.RED:
                 print("Testing: I am playing as red")
@@ -34,12 +35,12 @@ class Agent:
         """
         match self._color:
             case PlayerColor.RED:
-                # best_action, cost = self.minimax(self._state, 3, True)
-                # print(best_action, cost)
-                # return best_action
-                return self.find_possible_actions(self._state)[0]
+                # return self.find_possible_actions(self._state)[0]
+                best_action, cost = self.minimax(self._state, 3, True)
+                print(best_action, cost)
+                return best_action
             case PlayerColor.BLUE:
-                return self.find_possible_actions(self._state)[0]
+                # return self.find_possible_actions(self._state)[0]
                 best_action, cost = self.minimax(self._state, 3, True)
                 print(best_action, cost)
                 return best_action
@@ -51,10 +52,12 @@ class Agent:
         match action:
             case SpawnAction(cell):
                 print(f"Testing: {color} SPAWN at {cell}")
+                self._prev_state = self._state.copy()
                 self._state[cell] = (color, 1)
                 print(self._state)
             case SpreadAction(cell, direction):
                 print(f"Testing: {color} SPREAD from {cell}, {direction}")
+                self._prev_state = self._state.copy()
                 (r, q, dr, dq) = (cell.r, cell.q, direction.r, direction.q)
                 new_state = self._state.copy()
                 (spread_colour, spread_power) = new_state[cell]
@@ -89,7 +92,7 @@ class Agent:
     
     def find_possible_actions(self, b: BoardState) -> list[Action]:
         possible_actions: list[Action] = self.find_spread_actions(self._color)  + self.find_spawn_actions()
-        print(possible_actions)
+        print(f"possible actions: {possible_actions}")
         return possible_actions
     
     def find_spread_actions(self, color: PlayerColor) -> list[Action]:
@@ -110,7 +113,7 @@ class Agent:
         action_list: list[Action] = []
 
         for coords, cell in self._state.items():
-            if cell[0] == color:
+            if cell[COLOUR] == color:
                 for direction in HexDir:
                     new_action = SpreadAction(coords, direction)
                     action_list.append(new_action)
@@ -141,7 +144,9 @@ class Agent:
         curr_min = float('inf')
         best_action = None
         for action in self.find_possible_actions(b):
-            b.apply_action(action)
+            print(f"action: {action}")
+            # b.apply_action(action)
+            self.turn(self._color, action)
             _, val = self.minimax(b, depth-1, not is_max)
             if is_max:
                 curr_max = max(val, curr_max)
@@ -149,7 +154,8 @@ class Agent:
             else:
                 curr_min = min(val, curr_min)
                 best_action = action
-            b.undo_action()
+            # b.undo_action()
+            self._state = self._prev_state
         
         if is_max:
             cost = curr_max
