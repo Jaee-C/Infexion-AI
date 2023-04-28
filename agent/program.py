@@ -34,14 +34,15 @@ class Agent:
         """
         match self._color:
             case PlayerColor.RED:
-                print(self._state)
-                if len(self._state) > 0:
-                    return SpreadAction(HexPos(3, 3), HexDir.Up)
-                return SpawnAction(HexPos(3, 3))
+                # best_action, cost = self.minimax(self._state, 3, True)
+                # print(best_action, cost)
+                # return best_action
+                return self.find_possible_actions(self._state)[0]
             case PlayerColor.BLUE:
-                # This is going to be invalid... BLUE never spawned!
-                return SpawnAction(HexPos(2, 3))
-                # return SpreadAction(HexPos(3, 3), HexDir.Up)
+                return self.find_possible_actions(self._state)[0]
+                best_action, cost = self.minimax(self._state, 3, True)
+                print(best_action, cost)
+                return best_action
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
         """
@@ -49,10 +50,11 @@ class Agent:
         """
         match action:
             case SpawnAction(cell):
-                # print(f"Testing: {color} SPAWN at {cell}")
+                print(f"Testing: {color} SPAWN at {cell}")
                 self._state[cell] = (color, 1)
+                print(self._state)
             case SpreadAction(cell, direction):
-                # print(f"Testing: {color} SPREAD from {cell}, {direction}")
+                print(f"Testing: {color} SPREAD from {cell}, {direction}")
                 (r, q, dr, dq) = (cell.r, cell.q, direction.r, direction.q)
                 new_state = self._state.copy()
                 (spread_colour, spread_power) = new_state[cell]
@@ -71,16 +73,19 @@ class Agent:
                     else:
                         new_state[current_cell] = (spread_colour, new_power)
                 self._state = new_state
+                print(self._state)
 
     def evaluate_value(self, b: BoardState) -> int:
 
         return
     
     def terminal_test(self, b: BoardState) -> PlayerColor:
+
         return
     
     def find_possible_actions(self, b: BoardState) -> list[Action]:
-        possible_actions: list[Action] = self.find_spread_actions(self._color) 
+        possible_actions: list[Action] = self.find_spread_actions(self._color)  + self.find_spawn_actions()
+        print(possible_actions)
         return possible_actions
     
     def find_spread_actions(self, color: PlayerColor) -> list[Action]:
@@ -103,7 +108,7 @@ class Agent:
         for coords, cell in self._state.items():
             if cell[0] == color:
                 for direction in HexDir:
-                    new_action = Action(coords, direction)
+                    new_action = SpreadAction(coords, direction)
                     action_list.append(new_action)
         
         return action_list
@@ -111,14 +116,20 @@ class Agent:
     def find_spawn_actions(self) -> list[Action]:
         action_list: list[Action] = []
 
-        # for 
+        # Find unoccupied cells
+        for i in range(BOARD_N):
+            for j in range(BOARD_N):
+                if HexPos(i, j) not in self._state:
+                    new_action = SpawnAction(HexPos(i, j))
+                    action_list.append(new_action)
 
-        return action_list
+        # only return the first action for now
+        return action_list[0:1]
 
     def minimax(self, b:BoardState, depth:int, is_max:bool) -> tuple[Action, int]:
         if depth == 0:
                 return None, self.evaluate_value(b)
-        winner=self.terminal_test(b)
+        winner = self.terminal_test(b)
         if winner != None:
             return None, float('inf') if winner == self.color else float('-inf') # pos or neg depending on ismax or not
 

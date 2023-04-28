@@ -2,13 +2,13 @@
 * `python -m referee --help`
 
 ToDos (24/4)
-- [ ] `update_board_state(b: BoardState)` Update board state after every turn -- Heavy inspo from `referee.game.Board`
+- [x] `update_board_state(b: BoardState)` Update board state after every turn -- Heavy inspo from `referee.game.Board`
 - [ ] Implement Minimax
     - [ ] `terminal_test(b: BoardState) -> bool` check if game has ended -- Use Board.winner_color()
-    - [ ] [XY] `find_possible_actions(b: BoardState) -> list[Action]` Find all possible actions from current state (SPREAD/SPAWN)optimizing minimax algorithm
+    - [x] [XY] `find_possible_actions(b: BoardState) -> list[Action]` Find all possible actions from current state (SPREAD/SPAWN)optimizing minimax algorithm
       - [x] [WJ]`find_spread_actions(b: BoardState) -> list[Action]`
         - migrate from part A
-      - [ ] [XY] `find_spawn_actions(b: BoardState) -> list[Action]`
+      - [x] [XY] `find_spawn_actions(b: BoardState) -> list[Action]`
         - start with only returning 1 spawn action (first available spawn position)
         - think about best spawn positions
         - we probably don't want to generate all spawn actions as it would be bad for branching factor
