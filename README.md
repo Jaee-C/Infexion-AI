@@ -12,6 +12,7 @@ ToDos (24/4)
         - start with only returning 1 spawn action (first available spawn position)
         - think about best spawn positions
         - we probably don't want to generate all spawn actions as it would be bad for branching factor
+        - [ ] check if power limit is reached, if so, no spawn actions are possible
     - [ ] [XY] `evaluate_value(b: BoardState) -> int` Cost function (prev eval function?)
         - Number of blue remaining
         - number of red - blue

@@ -47,14 +47,13 @@ class Agent:
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
         """
-        Update the agent with the last player's action.
+        Update the agent's state with the last player's action.
         """
         match action:
             case SpawnAction(cell):
                 print(f"Testing: {color} SPAWN at {cell}")
                 self._prev_state = self._state.copy()
                 self._state[cell] = (color, 1)
-                print(self._state)
             case SpreadAction(cell, direction):
                 print(f"Testing: {color} SPREAD from {cell}, {direction}")
                 self._prev_state = self._state.copy()
@@ -76,7 +75,8 @@ class Agent:
                     else:
                         new_state[current_cell] = (spread_colour, new_power)
                 self._state = new_state
-                print(self._state)
+        print(f"prev_state: {self._prev_state}")
+        print(f"state: {self._state}")
 
     def evaluate_value(self, b: BoardState) -> int:
         # Count agent's power
@@ -90,8 +90,8 @@ class Agent:
         
         return
     
-    def find_possible_actions(self, b: BoardState) -> list[Action]:
-        possible_actions: list[Action] = self.find_spread_actions(self._color)  + self.find_spawn_actions()
+    def find_possible_actions(self, b: BoardState, c: PlayerColor) -> list[Action]:
+        possible_actions: list[Action] = self.find_spread_actions(c)  + self.find_spawn_actions()
         print(f"possible actions: {possible_actions}")
         return possible_actions
     
@@ -138,15 +138,16 @@ class Agent:
                 return None, self.evaluate_value(b)
         winner = self.terminal_test(b)
         if winner != None:
-            return None, float('inf') if winner == self.color else float('-inf') # pos or neg depending on ismax or not
+            return None, float('inf') if winner == self._color else float('-inf') # pos or neg depending on ismax or not
 
         curr_max = float('-inf')
         curr_min = float('inf')
         best_action = None
-        for action in self.find_possible_actions(b):
-            print(f"action: {action}")
+        colour = self._color if is_max else self._color.opponent
+        for action in self.find_possible_actions(b, colour):
+            print(f"\naction: {action}")
             # b.apply_action(action)
-            self.turn(self._color, action)
+            self.turn(colour, action)
             _, val = self.minimax(b, depth-1, not is_max)
             if is_max:
                 curr_max = max(val, curr_max)
@@ -160,5 +161,5 @@ class Agent:
         if is_max:
             cost = curr_max
         else:
-            const = curr_min
+            cost = curr_min
         return best_action, cost
