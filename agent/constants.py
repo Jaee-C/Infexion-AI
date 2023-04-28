@@ -1,0 +1,2 @@
+COLOUR = 0
+POWER = 1
