@@ -1,7 +1,7 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part B: Game Playing Agent
 
-from agent.constants import POWER
+from agent.constants import COLOUR, POWER
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 from referee.game.constants import BOARD_N, MAX_CELL_POWER
@@ -76,11 +76,15 @@ class Agent:
                 print(self._state)
 
     def evaluate_value(self, b: BoardState) -> int:
-
-        return
+        # Count agent's power
+        power = 0
+        for cell in b:
+            if b[cell][COLOUR] == PlayerColor.BLUE:
+                power += b[cell][POWER]
+        return power
     
     def terminal_test(self, b: BoardState) -> PlayerColor:
-
+        
         return
     
     def find_possible_actions(self, b: BoardState) -> list[Action]:
