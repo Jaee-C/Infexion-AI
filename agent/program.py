@@ -52,39 +52,11 @@ class Agent:
         """
         match action:
             case SpawnAction(cell):
-                # print(f"Testing: {color} SPAWN at {cell}")
-                # self._prev_state = self._state.copy()
-                # self._state[cell] = (color, 1)
-                # print(self._state[cell])
                 self._state.apply_action(action)
             case SpreadAction(cell, direction):
-                # print(f"Testing: {color} SPREAD from {cell}, {direction}")
-                # self._prev_state = self._state.copy()
                 print("SPREADS")
                 (r, q, dr, dq) = (cell.r, cell.q, direction.r, direction.q)
                 self._state.apply_action(action)
-                # new_state = self._state.copy()
-                # (spread_colour, spread_power) = new_state[cell]
-                # self._state.apply_action(action)
-
-                # Empty the current cell
-                # del new_state[cell]
-
-                # Update the power of the cell that is being spread to
-                # for i in range(1, spread_power + 1):
-                #     current_cell = ((r + dr * i) %
-                #                     BOARD_N, (q + dq * i) % BOARD_N)
-                #     new_power = new_state[current_cell][POWER] + \
-                #         1 if current_cell in new_state else 1
-
-                #     # Empty the cell if it has reached max power
-                #     if new_power == MAX_CELL_POWER:
-                #         new_state.pop(current_cell)
-                #     else:
-                #         new_state[current_cell] = (spread_colour, new_power)
-                # self._state = new_state
-        # print(f"prev_state: {self._prev_state}")
-        # print(f"state: {self._state}")
 
     def evaluate_value(self, b: Board) -> int:
         # Count agent's power
