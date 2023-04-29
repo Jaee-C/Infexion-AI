@@ -139,8 +139,8 @@ class Agent:
                     new_action = SpawnAction(HexPos(i, j))
                     action_list.append(new_action)
 
-        # only return the first action for now
-        return action_list[0:1]
+        # only return the first action for now -- add a new more spawn options otherwise insta win
+        return action_list[0:3]
 
     def minimax(self, b: Board, depth: int, is_max: bool) -> tuple[Action, int]:
         if depth == 0:
@@ -159,11 +159,11 @@ class Agent:
         for action in self.find_possible_actions(b, colour):
             b.apply_action(action)
             _, val = self.minimax(b, depth-1, not is_max)
-            if is_max:
-                curr_max = max(val, curr_max)
+            if is_max and val > curr_max:
+                curr_max = val
                 best_action = action
-            else:
-                curr_min = min(val, curr_min)
+            elif not is_max and val < curr_min:
+                curr_min = val
                 best_action = action
             b.undo_action()
             # self._state = self._prev_state
