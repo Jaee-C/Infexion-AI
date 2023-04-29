@@ -97,9 +97,6 @@ class Agent:
                     power -= b[cell].power
         return power
 
-    def terminal_test(self, b: Board) -> PlayerColor|None:
-        return None
-
     def find_possible_actions(self, b: Board, c: PlayerColor) -> list[Action]:
         possible_actions: list[Action] = self.find_spread_actions(c)  + self.find_spawn_actions()
         return possible_actions
@@ -147,8 +144,8 @@ class Agent:
             # print(b.render())
             # print(f"TESING: {self.evaluate_value(b)}")
             return None, self.evaluate_value(b)
-        winner = self.terminal_test(b)
-        if winner != None:
+        if b.game_over:
+            winner = b.winner_color
             # pos or neg depending on ismax or not
             return None, float('inf') if winner == self._color else float('-inf')
 
