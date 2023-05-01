@@ -37,13 +37,15 @@ class Agent:
         match self._color:
             case PlayerColor.RED:
                 # return self.find_possible_actions(self._state)[0]
-                best_action, cost = self.minimax(self._state, 3, True)
-                print(f"Testing: {self._color}, {best_action}, {cost}")
+                best_action, cost = self.minimax(
+                    self._state, 3, True, float('-inf'), float('inf'))
+                # print(f"Testing: {self._color}, {best_action}, {cost}")
                 return best_action
             case PlayerColor.BLUE:
                 # return self.find_possible_actions(self._state)[0]
-                best_action, cost = self.minimax(self._state, 3, True)
-                print(best_action, cost)
+                best_action, cost = self.minimax(
+                    self._state, 3, True, float('-inf'), float('inf'))
+                # print(best_action, cost)
                 return best_action
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
@@ -54,8 +56,6 @@ class Agent:
             case SpawnAction(cell):
                 self._state.apply_action(action)
             case SpreadAction(cell, direction):
-                print("SPREADS")
-                (r, q, dr, dq) = (cell.r, cell.q, direction.r, direction.q)
                 self._state.apply_action(action)
 
     def evaluate_value(self, b: Board) -> int:
@@ -70,7 +70,8 @@ class Agent:
         return power
 
     def find_possible_actions(self, b: Board, c: PlayerColor) -> list[Action]:
-        possible_actions: list[Action] = self.find_spread_actions(c)  + self.find_spawn_actions()
+        possible_actions: list[Action] = self.find_spread_actions(
+            c) + self.find_spawn_actions()
         return possible_actions
 
     def find_spread_actions(self, color: PlayerColor) -> list[Action]:
@@ -93,7 +94,8 @@ class Agent:
         for i in range(BOARD_N):
             for j in range(BOARD_N):
                 if self._state[HexPos(i, j)].player == color:
-                    new_actions = [SpreadAction(HexPos(i, j), direction) for direction in HexDir]
+                    new_actions = [SpreadAction(
+                        HexPos(i, j), direction) for direction in HexDir]
                     action_list += new_actions
 
         return action_list
@@ -111,7 +113,7 @@ class Agent:
         # only return the first action for now -- add a new more spawn options otherwise insta win
         return action_list[0:3]
 
-    def minimax(self, b: Board, depth: int, is_max: bool) -> tuple[Action, int]:
+    def minimax(self, b: Board, depth: int, is_max: bool, alpha: int, beta: int) -> tuple[Action, int]:
         if depth == 0:
             # print(b.render())
             # print(f"TESING: {self.evaluate_value(b)}")
@@ -120,22 +122,31 @@ class Agent:
             winner = b.winner_color
             # pos or neg depending on ismax or not
             return None, float('inf') if winner == self._color else float('-inf')
+        
 
+        colour = self._color if is_max else self._color.opponent
         curr_max = float('-inf')
         curr_min = float('inf')
-        best_action = None
-        colour = self._color if is_max else self._color.opponent
+        all_actions = self.find_possible_actions(b, colour)
+        best_action = all_actions[0]
         for action in self.find_possible_actions(b, colour):
             b.apply_action(action)
-            _, val = self.minimax(b, depth-1, not is_max)
+            _, val = self.minimax(b, depth-1, not is_max, alpha, beta)
             if is_max and val > curr_max:
                 curr_max = val
                 best_action = action
+                alpha = max(alpha, curr_max)
+                if beta <= alpha:
+                    b.undo_action()
+                    break
             elif not is_max and val < curr_min:
                 curr_min = val
                 best_action = action
+                beta = min(beta, curr_min)
+                if beta <= alpha:
+                    b.undo_action()
+                    break
             b.undo_action()
-            # self._state = self._prev_state
 
         if is_max:
             cost = curr_max
