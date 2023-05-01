@@ -1,7 +1,7 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part B: Game Playing Agent
 
-from agent.constants import COLOUR, POWER
+from .constants import COLOUR, POWER
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 from referee.game.constants import BOARD_N, MAX_CELL_POWER
