@@ -153,9 +153,9 @@ class Agent:
             tt_entry = self.transposition_table[b_hash]
             if tt_entry[1] == 'EXACT':
                 return tt_entry[0][0], tt_entry[0][1], 1 
-            elif tt_entry[1] == 'LOWERCASE':
+            elif tt_entry[1] == 'MAX':
                 alpha = max(alpha, tt_entry[0][1])
-            elif tt_entry[1] == 'UPPERCASE':
+            elif tt_entry[1] == 'MIN':
                 beta = min(beta, tt_entry[0][1])
         n += 1
         colour = self._color if is_max else self._color.opponent
@@ -209,14 +209,15 @@ class Agent:
             return None, self.evaluate_value(b), 1
 
         alpha_org = alpha
+        beta_org = beta
         b_hash = b.get_hash()
         if b_hash in self.transposition_table:
             tt_entry = self.transposition_table[b_hash]
             if tt_entry[1] == 'EXACT':
                 return tt_entry[0][0], tt_entry[0][1], 1 
-            elif tt_entry[1] == 'LOWERCASE':
+            elif tt_entry[1] == 'MAX':
                 alpha = max(alpha, tt_entry[0][1])
-            elif tt_entry[1] == 'UPPERCASE':
+            elif tt_entry[1] == 'MIN':
                 beta = min(beta, tt_entry[0][1])
         curr_max = float('-inf')
         curr_min = float('inf')
@@ -246,7 +247,7 @@ class Agent:
         else:
             cost = curr_min
 
-        self._store(self.transposition_table, b, alpha_org, beta, best_action, cost)
+        self._store(self.transposition_table, b, alpha_org, beta_org, best_action, cost)
 
         return best_action, cost, n
     
@@ -266,9 +267,9 @@ class Agent:
 
     def _store(self, table: dict, board: Board, alpha: int, beta: int, best, cost):
         if cost <= alpha:
-            flag = 'UPPERCASE'
+            flag = 'MIN'
         elif cost >= beta:
-            flag = 'LOWERCASE'
+            flag = 'MAX'
         else:
             flag = 'EXACT'
 
