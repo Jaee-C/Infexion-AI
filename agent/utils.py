@@ -5,9 +5,9 @@ from referee.game.hex import HexDir, HexPos
 from referee.game.player import PlayerColor
 
 
-def find_possible_actions(b: Board, c: PlayerColor) -> list[Action]:
+def find_possible_actions(b: Board, c: PlayerColor, spawn_limit: int=3) -> list[Action]:
         possible_actions: list[Action] = find_spread_actions(b, 
-            c) + find_spawn_actions(b)
+            c) + find_spawn_actions(b, spawn_limit)
         return possible_actions
 
 def find_spread_actions(b: Board, color: PlayerColor) -> list[Action]:
@@ -36,7 +36,7 @@ def find_spread_actions(b: Board, color: PlayerColor) -> list[Action]:
 
     return action_list
 
-def find_spawn_actions(b) -> list[Action]:
+def find_spawn_actions(b, limit=3) -> list[Action]:
     action_list: list[Action] = []
     
     # Check if max power reached
@@ -51,4 +51,6 @@ def find_spawn_actions(b) -> list[Action]:
                 action_list.append(new_action)
 
     # only return the first action for now -- add a new more spawn options otherwise insta win
-    return action_list[0:3]
+    if limit == None:
+        return action_list
+    return action_list[0:limit]
