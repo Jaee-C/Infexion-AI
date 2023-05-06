@@ -1,6 +1,7 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part B: Game Playing Agent
 
+from mcts.mcts import MonteCarloTreeSearch
 from .constants import COLOUR, POWER
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
@@ -24,11 +25,11 @@ class Agent:
         self._state: Board = Board()
         self.first = True
         # self._prev_state: Board = Board()
-        match color:
-            case PlayerColor.RED:
-                print("Testing: I am playing as red")
-            case PlayerColor.BLUE:
-                print("Testing: I am playing as blue")
+        # match color:
+        #     case PlayerColor.RED:
+        #         print("Testing: I am playing as red")
+        #     case PlayerColor.BLUE:
+        #         print("Testing: I am playing as blue")
 
     def action(self, **referee: dict) -> Action:
         """
@@ -37,8 +38,10 @@ class Agent:
         match self._color:
             case PlayerColor.RED:
                 # return self.find_possible_actions(self._state)[0]
-                best_action, cost = self.minimax(
-                    self._state, 3, True, float('-inf'), float('inf'))
+                # best_action, cost = self.minimax(
+                #     self._state, 3, True, float('-inf'), float('inf'))
+                mcts = MonteCarloTreeSearch()
+                best_action = mcts.mcts(10, b=self._state)
                 # print(f"Testing: {self._color}, {best_action}, {cost}")
                 return best_action
             case PlayerColor.BLUE:
@@ -46,6 +49,7 @@ class Agent:
                 best_action, cost = self.minimax(
                     self._state, 3, True, float('-inf'), float('inf'))
                 # print(best_action, cost)
+
                 return best_action
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
@@ -68,8 +72,6 @@ class Agent:
                 else:
                     power -= b[cell].power
         return power
-
-    
 
     def minimax(self, b: Board, depth: int, is_max: bool, alpha: int, beta: int) -> tuple[Action, int]:
         if depth == 0:

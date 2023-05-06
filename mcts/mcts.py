@@ -1,14 +1,63 @@
-from referee.game import Action, Board
-from agent.program import Agent
-from agent.utils import find_possible_actions
-from referee.game.actions import SpawnAction, SpreadAction
-from referee.game.constants import BOARD_N
-from referee.game.hex import HexDir, HexPos, HexVec
 import random
-from referee.game import PlayerColor
-from referee.game.board import CellState
 import math
 import csv
+
+from referee.game.actions import Action, SpawnAction, SpreadAction
+from referee.game.board import Board, CellState
+from referee.game.constants import BOARD_N, MAX_TOTAL_POWER
+from referee.game.hex import HexDir, HexPos, HexVec
+from referee.game.player import PlayerColor
+
+
+def find_possible_actions(b: Board, c: PlayerColor, spawn_limit: int=3) -> list[Action]:
+        possible_actions: list[Action] = find_spread_actions(b, 
+            c) + find_spawn_actions(b, spawn_limit)
+        return possible_actions
+
+def find_spread_actions(b: Board, color: PlayerColor) -> list[Action]:
+    """
+    Find all the possible SPREAD actions that Red can make given a coordinate
+    of a red cell. Returns a list of `Actions` that can be made.
+
+    For each red cell, the red player can make 6 different SPREAD moves, in the
+    6 directions of the cell.
+
+    Arguments:
+    state -- current state of the game board
+    coordinate -- the coordinate of the piece to find actions of
+
+    Returns:
+    A list of possible actions to take from `coordinate`
+    """
+    action_list: list[Action] = []
+
+    for i in range(BOARD_N):
+        for j in range(BOARD_N):
+            if b[HexPos(i, j)].player == color:
+                new_actions = [SpreadAction(
+                    HexPos(i, j), direction) for direction in HexDir]
+                action_list += new_actions
+
+    return action_list
+
+def find_spawn_actions(b, limit=3) -> list[Action]:
+    action_list: list[Action] = []
+    
+    # Check if max power reached
+    if (b._total_power >= MAX_TOTAL_POWER):
+        return action_list
+
+    # Find unoccupied cells
+    for i in range(BOARD_N):
+        for j in range(BOARD_N):
+            if b[HexPos(i, j)].player == None:
+                new_action = SpawnAction(HexPos(i, j))
+                action_list.append(new_action)
+
+    # only return the first action for now -- add a new more spawn options otherwise insta win
+    if limit == None:
+        return action_list
+    return action_list[0:limit]
 
 UCB_CONSTANT = 1.41
 
@@ -73,7 +122,7 @@ class MonteCarloTreeSearch():
 
     def selection(self, parent_hash: str):
         # print(f"SELECTION parent_hash: {parent_hash}")
-        if self.tree == {}:
+        if parent_hash not in self.tree:
             self.expansion(None, parent_hash)
         
         # Select the child with the highest UCB value
@@ -102,7 +151,7 @@ class MonteCarloTreeSearch():
     
     def expansion(self, parent_hash: str, child_hash: str):
         # Create the new child node and add to the tree
-        print(f"  Expanding child {child_hash}")
+        # print(f"  Expanding child {child_hash}")
         is_red_turn = True if parent_hash in ["None", None] else not self.tree[parent_hash]["is_red_turn"]
         actions: list[Action] = find_possible_actions(self.unhash(child_hash), PlayerColor.RED if is_red_turn else PlayerColor.BLUE, None)
         hashed_children = [(str(a), None) for a in actions]
@@ -140,12 +189,7 @@ class MonteCarloTreeSearch():
         # Simulate play from that new state
         while not temp_board.game_over:
             # print(f"Game Over: {temp_board.game_over}")
-            if minimax:
-                minimax_player = Agent(temp_board._turn_color)
-                minimax_player._state = temp_board
-                action = minimax_player.action()
-            else:
-                action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, None))
+            action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, None))
 
             # print(str(action))
             temp_board.apply_action(action)
@@ -214,26 +258,41 @@ class MonteCarloTreeSearch():
         return
         
     
-    def mcts(self, num_iterations: int, minimax=False):
-        b = Board()
+    def mcts(self, num_iterations: int, minimax=False, b: Board=Board()) -> Action:
+        """
+        Run monte-carlo tree search for the specified number of iterations. Return the best action given the current board.
+        """
+        # self.tree = get_tree_from_csv("test.csv")
+        # Run MCTS for `num_iterations`
         for i in range(num_iterations):
-            print(f"\nMCTS Iteration {i}")
+            # print(f"\nMCTS Iteration {i}")
             parent_hash, child_hash = self.selection(self.hash(b))
             self.expansion(parent_hash, child_hash)
             # print(child_hash)
             isWin = self.simulation(child_hash, PlayerColor.RED, minimax)
             self.backpropagation(isWin, child_hash, [])
+        # Find best action for current board
+        parent_hash = self.hash(b)
+        children = self.tree[parent_hash]["children"]
+        # find for child with the highest win rate
+        best_winrate = -1
+        best_action = None
+        for child_action, child_hash in children:
+            if child_hash == None:
+                continue
+            curr_winrate = self.tree[child_hash]["wins"]/self.tree[child_hash]["visits"]
+            if curr_winrate > best_winrate:
+                best_winrate = curr_winrate
+                best_action = child_action
+        print(f"\nbest action: {best_action}, winrate: {best_winrate}")
+        return self.unhash_action(best_action)
+
         # self.print_tree()
 
-
-NUM_ITERATIONS = 500
-MINIMAX = False
-FILENAME = "test.csv"
-def main():
+def get_tree_from_csv(filename):
     tree = {}
-    # Try to read existing tree from csv file - create new tree is csv file does not exist
     try:
-        fp = open(FILENAME, "r", newline="")
+        fp = open(filename, "r", newline="")
         reader = csv.DictReader(fp)
 
         # Converting string representation of children to list of tuples
@@ -260,30 +319,32 @@ def main():
     except FileNotFoundError:
         # Creating new tree
         print("File not found. Creating new tree.")
-        fp = open(FILENAME, "w", newline="")
+        fp = open(filename, "w", newline="")
         writer = csv.DictWriter(fp, fieldnames=["hash", "wins", "visits", "ucb", "children", "parents", "is_red_turn"])
         writer.writeheader()
         fp.close()
-    
-    # try:
-    i = 0
-    while True:
-        print(f"\n===================== Iteration {i} ==============================")
-        i += 1
-        mcts = MonteCarloTreeSearch(tree)
-        # mcts.print_tree()
-        # mcts.print_tree()
-        mcts.mcts(NUM_ITERATIONS, MINIMAX)
-        # mcts.print_tree()
+    return tree
 
-        # Save tree to csv file
-        fp = open(FILENAME, "w", newline="")
-        writer = csv.writer(fp)
-        writer.writerow(["hash", "wins", "visits", "ucb", "children", "parents", "is_red_turn"])
-        for key, value in mcts.tree.items():
-            writer.writerow([key, value["wins"], value["visits"], value["ucb"], value["children"], value["parents"], value["is_red_turn"]])
-        fp.close()
+NUM_ITERATIONS = 100
+MINIMAX = False
+FILENAME = "test2.csv"
+def main():
+    
+    # Try to read existing tree from csv file - create new tree is csv file does not exist
+    
+
+    i = 0
+    # while True:
+    print(f"\n===================== Iteration {i} ==============================")
+    i += 1
+    # mcts = MonteCarloTreeSearch(tree)
+    mcts.mcts(NUM_ITERATIONS, MINIMAX, mcts.unhash("00B1,61R1"))
     # mcts.print_tree()
-    # except Exception as e:
-    #     print("ERROR OCCURRED!")
-    #     print(e)
+
+    # Save tree to csv file
+    fp = open(FILENAME, "w", newline="")
+    writer = csv.writer(fp)
+    writer.writerow(["hash", "wins", "visits", "ucb", "children", "parents", "is_red_turn"])
+    for key, value in mcts.tree.items():
+        writer.writerow([key, value["wins"], value["visits"], value["ucb"], value["children"], value["parents"], value["is_red_turn"]])
+    fp.close()
