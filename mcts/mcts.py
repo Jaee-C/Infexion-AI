@@ -10,7 +10,7 @@ from referee.game.board import CellState
 import math
 import csv
 
-UCB_CONSTANT = 1.65
+UCB_CONSTANT = 1.41
 
 class MonteCarloTreeSearch():
 
@@ -120,7 +120,7 @@ class MonteCarloTreeSearch():
             self.tree[child_hash]["parents"].append(parent_hash)
         # self.print_tree()
 
-    def simulation(self, child_hash: str, player: PlayerColor):
+    def simulation(self, child_hash: str, player: PlayerColor, minimax=False):
         # possible optimisation: evaluation function for every move
         b = self.unhash(child_hash)
         temp_board = Board(b._state)
@@ -139,11 +139,13 @@ class MonteCarloTreeSearch():
 
         # Simulate play from that new state
         while not temp_board.game_over:
-            minimax_player = Agent(temp_board._turn_color)
-            minimax_player._state = temp_board
-            # action = minimax_player.action()
-
-            action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, None))
+            # print(f"Game Over: {temp_board.game_over}")
+            if minimax:
+                minimax_player = Agent(temp_board._turn_color)
+                minimax_player._state = temp_board
+                action = minimax_player.action()
+            else:
+                action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, None))
 
             # print(str(action))
             temp_board.apply_action(action)
@@ -212,19 +214,20 @@ class MonteCarloTreeSearch():
         return
         
     
-    def mcts(self, num_iterations: int):
+    def mcts(self, num_iterations: int, minimax=False):
         b = Board()
         for i in range(num_iterations):
             print(f"\nMCTS Iteration {i}")
             parent_hash, child_hash = self.selection(self.hash(b))
             self.expansion(parent_hash, child_hash)
             # print(child_hash)
-            isWin = self.simulation(child_hash, PlayerColor.RED)
+            isWin = self.simulation(child_hash, PlayerColor.RED, minimax)
             self.backpropagation(isWin, child_hash, [])
         # self.print_tree()
 
 
 NUM_ITERATIONS = 500
+MINIMAX = False
 FILENAME = "test.csv"
 def main():
     tree = {}
@@ -245,7 +248,6 @@ def main():
                     c = c.strip("()").split("', '")
                     c = [ele.replace("'", "") for ele in c]
                     children.append(tuple(c))
-
             tree[row["hash"]] = {
                 "wins": float(row["wins"]),
                 "visits": float(row["visits"]),
@@ -264,10 +266,14 @@ def main():
         fp.close()
     
     # try:
+    i = 0
     while True:
+        print(f"\n===================== Iteration {i} ==============================")
+        i += 1
         mcts = MonteCarloTreeSearch(tree)
         # mcts.print_tree()
-        mcts.mcts(NUM_ITERATIONS)
+        # mcts.print_tree()
+        mcts.mcts(NUM_ITERATIONS, MINIMAX)
         # mcts.print_tree()
 
         # Save tree to csv file
@@ -277,6 +283,7 @@ def main():
         for key, value in mcts.tree.items():
             writer.writerow([key, value["wins"], value["visits"], value["ucb"], value["children"], value["parents"], value["is_red_turn"]])
         fp.close()
+    # mcts.print_tree()
     # except Exception as e:
     #     print("ERROR OCCURRED!")
     #     print(e)
