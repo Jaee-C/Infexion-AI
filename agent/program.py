@@ -53,7 +53,7 @@ class Agent:
                 res = self.minimax(self._state, 3, True, float('-inf'), float('inf'), 0)
                 # print(f"BLUE nodes {res[-1]}")
                 # print(best_action, cost)
-                print(f"TIME SPENT: {180 - referee['time_remaining']}")
+                # print(f"TIME SPENT: {180 - referee['time_remaining']}")
                 self.total_time_spent += 180 - referee['time_remaining']
                 return res[0]
 
@@ -67,7 +67,7 @@ class Agent:
             case SpreadAction(cell, direction):
                 self._state.apply_action(action)
         self.turns += 1
-        print(f"Average time spent: {self.total_time_spent / self.turns}")
+        # print(f"Average time spent: {self.total_time_spent / self.turns}")
 
     def evaluate_value(self, b: Board) -> int:
         # Count agent's power
@@ -137,8 +137,8 @@ class Agent:
     def minimax(self, b: Board, depth: int, is_max: bool, alpha: int, beta: int, n: int) -> tuple[Action, int, int]:
         
         if depth == 0:
-            # return None, self.evaluate_value(b), n
-            return self.quiescence_search(b, 3, not is_max, alpha, beta, n)
+            return None, self.evaluate_value(b), n
+            # return self.quiescence_search(b, 3, not is_max, alpha, beta, n)
         if b.game_over:
             winner = b.winner_color
             # pos or neg depending on ismax or not
