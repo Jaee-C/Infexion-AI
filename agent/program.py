@@ -4,7 +4,7 @@
 from .constants import COLOUR, POWER
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
-from referee.game.constants import BOARD_N, MAX_CELL_POWER
+from referee.game.constants import BOARD_N, MAX_TOTAL_POWER
 from referee.game.hex import HexDir
 from .board import Board
 
@@ -117,7 +117,7 @@ class Agent:
     def find_spawn_actions(self) -> list[Action]:
         action_list: list[Action] = []
 
-        if self._state._total_power >= 48:
+        if self._state._total_power >= MAX_TOTAL_POWER:
             return []
 
         # Find unoccupied cells
@@ -191,7 +191,7 @@ class Agent:
         else:
             cost = curr_min
 
-        self._store(self.transposition_table, b, alpha_org, beta, best_action, cost)
+        # self._store(self.transposition_table, b, alpha_org, beta, best_action, cost)
         
         return best_action, cost, n
     
