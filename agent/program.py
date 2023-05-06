@@ -41,6 +41,9 @@ class Agent:
         """
         Return the next action to take.
         """
+        res = self.minimax(self._state, 3, True, float('-inf'), float('inf'), 0)
+        return res[0]
+
         match self._color:
             case PlayerColor.RED:
                 # return self.find_possible_actions(self._state)[0]
@@ -127,7 +130,7 @@ class Agent:
                     new_action = SpawnAction(HexPos(i, j))
                     action_list.append(new_action)
 
-        random.shuffle(action_list)
+        # random.shuffle(action_list)
         # only return the first action for now -- add a new more spawn options otherwise insta win
         return action_list
     
@@ -191,7 +194,7 @@ class Agent:
         else:
             cost = curr_min
 
-        # self._store(self.transposition_table, b, alpha_org, beta, best_action, cost)
+        self._store(self.transposition_table, b, alpha_org, beta, best_action, cost)
         
         return best_action, cost, n
     
