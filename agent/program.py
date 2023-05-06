@@ -117,6 +117,9 @@ class Agent:
     def find_spawn_actions(self) -> list[Action]:
         action_list: list[Action] = []
 
+        if self._state._total_power >= 48:
+            return []
+
         # Find unoccupied cells
         for i in range(BOARD_N):
             for j in range(BOARD_N):
