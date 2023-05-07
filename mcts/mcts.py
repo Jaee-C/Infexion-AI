@@ -8,7 +8,6 @@ from referee.game.constants import BOARD_N, MAX_TOTAL_POWER
 from referee.game.hex import HexDir, HexPos, HexVec
 from referee.game.player import PlayerColor
 
-
 def find_possible_actions(b: Board, c: PlayerColor, spawn_limit: int=3) -> list[Action]:
         possible_actions: list[Action] = find_spread_actions(b, 
             c) + find_spawn_actions(b, spawn_limit)
@@ -62,7 +61,6 @@ def find_spawn_actions(b, limit=3) -> list[Action]:
 UCB_CONSTANT = 1.41
 
 class MonteCarloTreeSearch():
-
     """
     Tree representation
 
@@ -74,13 +72,16 @@ class MonteCarloTreeSearch():
         parents: [hashed_state(str)]
     }
     """
+
     Child = (Action, str)
 
     def __init__(self, tree={}) -> None:
         self.tree = tree
     
     def print_tree(self):
-        # pretty print a dictionary as a table
+        """
+        Pretty print the MCTS tree as a table.
+        """
         print()
         print("{:100s} | {:10s} | {:10s} | {:10s} | {:10s} | {:10s} | {:5s}".format("hash", "wins", "visits", "ucb", "children", "parents", "is_red"))
         for hash, node in self.tree.items():
@@ -88,6 +89,17 @@ class MonteCarloTreeSearch():
 
 
     def hash(self, b: Board) -> str:
+        """
+        Hashes the board state into a string, where each cell is represented as a string of the form: "r-q:COLOR<POWER>"
+        where r and q are the row and column of the cell, COLOR is either "R" or "B" for red or blue, and POWER is the power of the cell. 
+        Each cell is separated by commas (`,`).
+
+        Arguments:
+        b -- the board to hash
+
+        Returns:
+        A string representing the board state
+        """
         hash = ""
         for i in range(BOARD_N):
             for j in range(BOARD_N):
@@ -95,11 +107,20 @@ class MonteCarloTreeSearch():
                 if b[cell].player != None:
                     player_short = "R" if b[cell].player == PlayerColor.RED else "B"
                     cell_short = str(cell).replace("-", "")
-                    hash += f"{cell_short}{player_short}{str(b[cell].power)},"   # r-q:COLOR<POWER> | eg. "00R1,10B2,..." : {...}
+                    hash += f"{cell_short}{player_short}{str(b[cell].power)},"   # r-q:COLOR<POWER>
         hash = hash.strip(",")
         return hash
     
     def unhash(self, s: str) -> Board:
+        """
+        Unhashes the board state from a string, where each cell is represented as a string of the form: "r-q:COLOR<POWER>" to a Board object.
+
+        Arguments:
+        s -- the string to unhash
+
+        Returns:
+        A Board object representing the board state.
+        """
         new_board: Board = Board()
         if s == "":
             return new_board
@@ -112,6 +133,7 @@ class MonteCarloTreeSearch():
         return new_board
     
     def unhash_action(self, s: str) -> Action:
+
         if s.startswith("SPAWN"):
             return SpawnAction(HexPos(int(s[6]), int(s[9])))
         if s.startswith("SPREAD"):
@@ -121,7 +143,17 @@ class MonteCarloTreeSearch():
             return SpreadAction(pos, dir)
 
     def selection(self, parent_hash: str):
+        """
+        Start at the root node of the tree and recursively select the child node with the highest Upper Confidence Bound (UCB) until a leaf node is reached. The UCB value balances exploration (visiting less-visited nodes) and exploitation (favoring nodes with high estimated values).
+
+        Arguments:
+        parent_hash -- the hash of the parent node
+
+        Returns:
+        A tuple of (parent_hash, child_hash)
+        """
         # print(f"SELECTION parent_hash: {parent_hash}")
+        # Create parent node if not present in tree
         if parent_hash not in self.tree:
             self.expansion(None, parent_hash)
         
@@ -153,7 +185,7 @@ class MonteCarloTreeSearch():
         # Create the new child node and add to the tree
         # print(f"  Expanding child {child_hash}")
         is_red_turn = True if parent_hash in ["None", None] else not self.tree[parent_hash]["is_red_turn"]
-        actions: list[Action] = find_possible_actions(self.unhash(child_hash), PlayerColor.RED if is_red_turn else PlayerColor.BLUE, None)
+        actions: list[Action] = find_possible_actions(self.unhash(child_hash), PlayerColor.RED if is_red_turn else PlayerColor.BLUE, 2)
         hashed_children = [(str(a), None) for a in actions]
 
         if child_hash not in self.tree:
@@ -189,7 +221,7 @@ class MonteCarloTreeSearch():
         # Simulate play from that new state
         while not temp_board.game_over:
             # print(f"Game Over: {temp_board.game_over}")
-            action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, None))
+            action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, 2))
 
             # print(str(action))
             temp_board.apply_action(action)
