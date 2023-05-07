@@ -60,6 +60,62 @@ def find_spawn_actions(b, limit=3) -> list[Action]:
 
 UCB_CONSTANT = 1.41
 
+class Minimax():
+    def __init__(self, color: PlayerColor):
+        self._color = color
+
+    def evaluate_value(self, b: Board) -> int:
+        # Count agent's power
+        power = 0
+        for cell in b._state:
+            if b[cell].power > 0:
+                if b[cell].player == self._color:
+                    power += b[cell].power
+                else:
+                    power -= b[cell].power
+        return power
+    
+    def minimax(self, b: Board, depth: int, is_max: bool, alpha: int, beta: int) -> tuple[Action, int]:
+        if depth == 0:
+            # print(b.render())
+            # print(f"TESING: {self.evaluate_value(b)}")
+            return None, self.evaluate_value(b)
+        if b.game_over:
+            winner = b.winner_color
+            # pos or neg depending on ismax or not
+            return None, float('inf') if winner == self._color else float('-inf')
+        
+
+        colour = self._color if is_max else self._color.opponent
+        curr_max = float('-inf')
+        curr_min = float('inf')
+        all_actions = find_possible_actions(b, colour)
+        best_action = all_actions[0]
+        for action in find_possible_actions(b, colour):
+            b.apply_action(action)
+            _, val = self.minimax(b, depth-1, not is_max, alpha, beta)
+            if is_max and val > curr_max:
+                curr_max = val
+                best_action = action
+                alpha = max(alpha, curr_max)
+                if beta <= alpha:
+                    b.undo_action()
+                    break
+            elif not is_max and val < curr_min:
+                curr_min = val
+                best_action = action
+                beta = min(beta, curr_min)
+                if beta <= alpha:
+                    b.undo_action()
+                    break
+            b.undo_action()
+
+        if is_max:
+            cost = curr_max
+        else:
+            cost = curr_min
+        return best_action, cost
+
 class MonteCarloTreeSearch():
     """
     Tree representation
@@ -201,6 +257,8 @@ class MonteCarloTreeSearch():
             self.tree[child_hash]["parents"].append(parent_hash)
         # self.print_tree()
 
+    
+
     def simulation(self, child_hash: str, player: PlayerColor, minimax=False):
         # possible optimisation: evaluation function for every move
         b = self.unhash(child_hash)
@@ -221,11 +279,13 @@ class MonteCarloTreeSearch():
         # Simulate play from that new state
         while not temp_board.game_over:
             # print(f"Game Over: {temp_board.game_over}")
-            action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, 2))
+            minimaxAgent = Minimax(temp_board._turn_color)
+            action, cost = minimaxAgent.minimax(temp_board, 3, True, float('-inf'), float('inf'))
+            # action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, 2))
 
-            # print(str(action))
+            print(str(action))
             temp_board.apply_action(action)
-            # print(temp_board.render())
+            print(temp_board.render())
         if temp_board.winner_color == None:
             return 0.5
         elif temp_board.winner_color == player:
@@ -288,7 +348,7 @@ class MonteCarloTreeSearch():
             # self.print_tree()
             return self.backpropagation(isWin, parent_hash, visited)
         return
-        
+    
     
     def mcts(self, num_iterations: int, minimax=False, b: Board=Board()) -> Action:
         """
@@ -369,7 +429,7 @@ def main():
     # while True:
     print(f"\n===================== Iteration {i} ==============================")
     i += 1
-    # mcts = MonteCarloTreeSearch(tree)
+    mcts = MonteCarloTreeSearch({})
     mcts.mcts(NUM_ITERATIONS, MINIMAX, mcts.unhash("00B1,61R1"))
     # mcts.print_tree()
 
