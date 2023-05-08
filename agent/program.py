@@ -22,12 +22,7 @@ class Agent:
         """
         self._color = color
         self._state: Board = Board()
-        # self.first = True
-        # self._prev_state: Board = Board()
-        # self.transposition_table = Transposition()
-        # self.total_time_spent = 0
-        # self.turns = 0
-        # self.opponent = None
+        
         match color:
             case PlayerColor.RED:
                 print("Testing: I am playing as red")
@@ -40,13 +35,6 @@ class Agent:
         """
         Return the next action to take.
         """
-        # res = self.minimax(self._state, 3, True, float('-inf'), float('inf'))
-
-        # if referee["space_remaining"] and referee["space_remaining"] <= 5:
-        #     self.transposition_table.clear()
-
-        # return res[0]
-
         match self._color:
             case PlayerColor.RED:
                 minimax_agent_1 = MinimaxAgent(self._color, "eval_func1")
@@ -56,9 +44,6 @@ class Agent:
                 minimax_agent_2 = MinimaxAgent(self._color, "eval_func2")
                 action, cost = minimax_agent_2.minimax(self._state, 3, True, float('-inf'), float('inf'))
                 return action
-                # res = self.minimax(self._state, 3, True, float('-inf'), float('inf'))
-                # self.total_time_spent += 180 - referee['time_remaining']
-                # return res[0]
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
         """
@@ -69,7 +54,5 @@ class Agent:
                 self._state.apply_action(action)
             case SpreadAction(cell, direction):
                 self._state.apply_action(action)
-        # self.turns += 1
-        # print(f"Average time spent: {self.total_time_spent / self.turns}")
 
     

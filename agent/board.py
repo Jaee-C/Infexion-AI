@@ -9,7 +9,6 @@ from referee.game.player import PlayerColor
 from referee.game.actions import Action, SpawnAction, SpreadAction
 from referee.game.constants import *
 
-
 # The CellState class is used to represent the state of a single cell on the
 # game board.
 

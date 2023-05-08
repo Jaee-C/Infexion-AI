@@ -9,9 +9,9 @@ from referee.game.hex import HexDir, HexPos, HexVec
 from referee.game.player import PlayerColor
 from .utils import find_possible_actions
 
-from .constants import UCB_CONSTANT, NUM_ITERATIONS, FILENAME
+from .constants import UCB_CONSTANT
 
-class MonteCarloTreeSearchAgent():
+class MCTSAgent():
     """
     Monte Carlo Tree Search Agent
     """
