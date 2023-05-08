@@ -3,3 +3,5 @@ test.py
 venv
 .idea/
 **/.DS_Store
+spec.pdf
+.vscode/
