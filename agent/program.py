@@ -1,17 +1,11 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part B: Game Playing Agent
 
-from mcts.mcts import MonteCarloTreeSearch
-from .constants import COLOUR, POWER
 from referee.game import \
-    PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
-from referee.game.constants import BOARD_N, MAX_TOTAL_POWER
-from referee.game.hex import HexDir
+    PlayerColor, Action, SpawnAction, SpreadAction
 from .board import Board
-from .transposition import Transposition, EntryFlag
+from .transposition import Transposition
 from .utils import find_possible_actions
-
-import random
 
 MAX_DEPTH = 3
 
