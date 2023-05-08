@@ -7,8 +7,11 @@ from referee.game import \
 from referee.game.constants import BOARD_N, MAX_TOTAL_POWER
 from referee.game.hex import HexDir
 from .board import Board
+from .transposition import Transposition, EntryFlag
 
 import random
+
+MAX_DEPTH = 3
 
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
@@ -25,7 +28,7 @@ class Agent:
         self._state: Board = Board()
         self.first = True
         # self._prev_state: Board = Board()
-        self.transposition_table = {}
+        self.transposition_table = Transposition()
         self.total_time_spent = 0
         self.turns = 0
         self.opponent = None
@@ -42,23 +45,20 @@ class Agent:
         Return the next action to take.
         """
         res = self.minimax(self._state, 3, True, float('-inf'), float('inf'), 0)
+
+        if referee["space_remaining"] and referee["space_remaining"] <= 5:
+            self.transposition_table.clear()
+
         return res[0]
 
-        match self._color:
-            case PlayerColor.RED:
-                # return self.find_possible_actions(self._state)[0]
-                res = self.random_actions(self._state)
-                # print(f"RED nodes {res[-1]}")
-                return res
-                # print(f"Testing: {self._color}, {best_action}, {cost}")
-            case PlayerColor.BLUE:
-                # return self.find_possible_actions(self._state)[0]
-                res = self.minimax(self._state, 3, True, float('-inf'), float('inf'), 0)
-                # print(f"BLUE nodes {res[-1]}")
-                # print(best_action, cost)
-                # print(f"TIME SPENT: {180 - referee['time_remaining']}")
-                self.total_time_spent += 180 - referee['time_remaining']
-                return res[0]
+        # match self._color:
+        #     case PlayerColor.RED:
+        #         res = self.random_actions(self._state)
+        #         return res
+        #     case PlayerColor.BLUE:
+        #         res = self.minimax(self._state, 3, True, float('-inf'), float('inf'), 0)
+        #         self.total_time_spent += 180 - referee['time_remaining']
+        #         return res[0]
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
         """
@@ -130,8 +130,7 @@ class Agent:
                     new_action = SpawnAction(HexPos(i, j))
                     action_list.append(new_action)
 
-        # random.shuffle(action_list)
-        # only return the first action for now -- add a new more spawn options otherwise insta win
+        random.shuffle(action_list)
         return action_list
     
     def random_actions(self, b: Board) -> Action:
@@ -154,15 +153,17 @@ class Agent:
                 return None, float('-inf'), 0
         
         alpha_org = alpha
+        beta_org = beta
         b_hash = b.get_hash()
-        if b_hash in self.transposition_table:
-            tt_entry = self.transposition_table[b_hash]
-            if tt_entry[1] == 'EXACT':
-                return tt_entry[0][0], tt_entry[0][1], 1 
-            elif tt_entry[1] == 'MAX':
-                alpha = max(alpha, tt_entry[0][1])
-            elif tt_entry[1] == 'MIN':
-                beta = min(beta, tt_entry[0][1])
+
+        # Probe the transposition table to see if we have a useable matching
+        # entry from the current position. If we get a hit, return the score
+        # and stop searching.
+        tt_score, should_use, best_move = self.transposition_table.find(b_hash, depth, alpha, beta)
+
+        if should_use:
+            return best_move, tt_score, 1
+
         n += 1
         colour = self._color if is_max else self._color.opponent
         curr_max = float('-inf')
@@ -194,89 +195,7 @@ class Agent:
         else:
             cost = curr_min
 
-        self._store(self.transposition_table, b, alpha_org, beta, best_action, cost)
+        b_hash = self._state.get_hash()
+        self.transposition_table.store(b_hash, cost, best_action, depth, alpha_org, beta_org)
         
         return best_action, cost, n
-    
-    def quiescence_search(self, b: Board, depth: int, is_max: bool, alpha: int, beta: int, n: int) -> tuple[Action, int, int]:
-        if b.game_over:
-            winner = b.winner_color
-            # pos or neg depending on ismax or not
-            if winner == self._color:
-                return [], float('inf'), 0
-            else:
-                return [], float('-inf'), 0
-        
-        n += 1
-        colour = self._color if is_max else self._color.opponent
-        capture_actions = list(filter(lambda x : self.is_a_capture(colour, x), self.find_possible_actions(b, colour)))
-
-        if len(capture_actions) == 0 or depth == 0:
-            return None, self.evaluate_value(b), 1
-
-        alpha_org = alpha
-        beta_org = beta
-        b_hash = b.get_hash()
-        if b_hash in self.transposition_table:
-            tt_entry = self.transposition_table[b_hash]
-            if tt_entry[1] == 'EXACT':
-                return tt_entry[0][0], tt_entry[0][1], 1 
-            elif tt_entry[1] == 'MAX':
-                alpha = max(alpha, tt_entry[0][1])
-            elif tt_entry[1] == 'MIN':
-                beta = min(beta, tt_entry[0][1])
-        curr_max = float('-inf')
-        curr_min = float('inf')
-        best_action = capture_actions[0]
-        for action in capture_actions:
-            if not b.validate_action(action):
-                continue
-
-            b.apply_action(action)
-            _, val, n1 = self.minimax(b, depth-1, not is_max, alpha, beta, n)
-            n += n1
-            if is_max and val > curr_max:
-                curr_max = val
-                best_action = action
-                alpha = max(alpha, curr_max)
-            elif not is_max and val < curr_min:
-                curr_min = val
-                best_action = action
-                beta = min(beta, curr_min)
-            if beta <= alpha:
-                b.undo_action()
-                break
-            b.undo_action()
-
-        if is_max:
-            cost = curr_max
-        else:
-            cost = curr_min
-
-        self._store(self.transposition_table, b, alpha_org, beta_org, best_action, cost)
-
-        return best_action, cost, n
-    
-    def is_a_capture(self, p: PlayerColor, a: Action):
-        opponent_color = PlayerColor.RED if p == PlayerColor.BLUE else PlayerColor.BLUE
-        old_num_opponent = len(self._state._player_cells(opponent_color))
-        self._state.apply_action(a);
-        new_num_opponent = len(self._state._player_cells(opponent_color))
-        self._state.undo_action()
-        if new_num_opponent < old_num_opponent:
-            print("old", old_num_opponent, self._state.render())
-            self._state.apply_action(a);
-            print("new", new_num_opponent, self._state.render())
-            self._state.undo_action()
-            return True
-        return False
-
-    def _store(self, table: dict, board: Board, alpha: int, beta: int, best, cost):
-        if cost <= alpha:
-            flag = 'MIN'
-        elif cost >= beta:
-            flag = 'MAX'
-        else:
-            flag = 'EXACT'
-
-        table[board.get_hash()] = [(best, cost), flag]
