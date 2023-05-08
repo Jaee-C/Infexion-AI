@@ -1,137 +1,31 @@
 import random
 import math
 import csv
-
+from agent.minimax import MinimaxAgent
 from referee.game.actions import Action, SpawnAction, SpreadAction
 from referee.game.board import Board, CellState
-from referee.game.constants import BOARD_N, MAX_TOTAL_POWER
+from referee.game.constants import BOARD_N
 from referee.game.hex import HexDir, HexPos, HexVec
 from referee.game.player import PlayerColor
+from .utils import find_possible_actions
 
-def find_possible_actions(b: Board, c: PlayerColor, spawn_limit: int=3) -> list[Action]:
-        possible_actions: list[Action] = find_spread_actions(b, 
-            c) + find_spawn_actions(b, spawn_limit)
-        return possible_actions
+from .constants import UCB_CONSTANT, NUM_ITERATIONS, FILENAME
 
-def find_spread_actions(b: Board, color: PlayerColor) -> list[Action]:
+class MonteCarloTreeSearchAgent():
     """
-    Find all the possible SPREAD actions that Red can make given a coordinate
-    of a red cell. Returns a list of `Actions` that can be made.
-
-    For each red cell, the red player can make 6 different SPREAD moves, in the
-    6 directions of the cell.
-
-    Arguments:
-    state -- current state of the game board
-    coordinate -- the coordinate of the piece to find actions of
-
-    Returns:
-    A list of possible actions to take from `coordinate`
+    Monte Carlo Tree Search Agent
     """
-    action_list: list[Action] = []
-
-    for i in range(BOARD_N):
-        for j in range(BOARD_N):
-            if b[HexPos(i, j)].player == color:
-                new_actions = [SpreadAction(
-                    HexPos(i, j), direction) for direction in HexDir]
-                action_list += new_actions
-
-    return action_list
-
-def find_spawn_actions(b, limit=3) -> list[Action]:
-    action_list: list[Action] = []
-    
-    # Check if max power reached
-    if (b._total_power >= MAX_TOTAL_POWER):
-        return action_list
-
-    # Find unoccupied cells
-    for i in range(BOARD_N):
-        for j in range(BOARD_N):
-            if b[HexPos(i, j)].player == None:
-                new_action = SpawnAction(HexPos(i, j))
-                action_list.append(new_action)
-
-    # only return the first action for now -- add a new more spawn options otherwise insta win
-    if limit == None:
-        return action_list
-    return action_list[0:limit]
-
-UCB_CONSTANT = 1.41
-
-class Minimax():
-    def __init__(self, color: PlayerColor):
-        self._color = color
-
-    def evaluate_value(self, b: Board) -> int:
-        # Count agent's power
-        power = 0
-        for cell in b._state:
-            if b[cell].power > 0:
-                if b[cell].player == self._color:
-                    power += b[cell].power
-                else:
-                    power -= b[cell].power
-        return power
-    
-    def minimax(self, b: Board, depth: int, is_max: bool, alpha: int, beta: int) -> tuple[Action, int]:
-        if depth == 0:
-            # print(b.render())
-            # print(f"TESING: {self.evaluate_value(b)}")
-            return None, self.evaluate_value(b)
-        if b.game_over:
-            winner = b.winner_color
-            # pos or neg depending on ismax or not
-            return None, float('inf') if winner == self._color else float('-inf')
-        
-
-        colour = self._color if is_max else self._color.opponent
-        curr_max = float('-inf')
-        curr_min = float('inf')
-        all_actions = find_possible_actions(b, colour)
-        best_action = all_actions[0]
-        for action in find_possible_actions(b, colour):
-            b.apply_action(action)
-            _, val = self.minimax(b, depth-1, not is_max, alpha, beta)
-            if is_max and val > curr_max:
-                curr_max = val
-                best_action = action
-                alpha = max(alpha, curr_max)
-                if beta <= alpha:
-                    b.undo_action()
-                    break
-            elif not is_max and val < curr_min:
-                curr_min = val
-                best_action = action
-                beta = min(beta, curr_min)
-                if beta <= alpha:
-                    b.undo_action()
-                    break
-            b.undo_action()
-
-        if is_max:
-            cost = curr_max
-        else:
-            cost = curr_min
-        return best_action, cost
-
-class MonteCarloTreeSearch():
-    """
-    Tree representation
-
-    hashed_state(str): {
-        wins: int,
-        visits: int,
-        ucb: int,
-        children: [(move(Action), hashed_state(str)), (... , ...), ...],
-        parents: [hashed_state(str)]
-    }
-    """
-
-    Child = (Action, str)
-
     def __init__(self, tree={}) -> None:
+        """
+        Tree representation of the MCTS tree. The tree is represented as a dictionary of hashed states, where each hashed state is a dictionary of the form:
+            hashed_state(str): {
+                wins: int,
+                visits: int,
+                ucb: int,
+                children: [(move(Action), hashed_state(str)), (... , ...), ...],
+                parents: [hashed_state(str)]
+            }
+        """
         self.tree = tree
     
     def print_tree(self):
@@ -189,7 +83,15 @@ class MonteCarloTreeSearch():
         return new_board
     
     def unhash_action(self, s: str) -> Action:
+        """
+        Unhashes the action from a string of the form: "SPAWN(r, q)" or "SPREAD(r, q, dr, dq)" to an Action object.
 
+        Arguments:
+            s -- the string to unhash
+
+        Returns:
+            An Action object representing the action.
+        """
         if s.startswith("SPAWN"):
             return SpawnAction(HexPos(int(s[6]), int(s[9])))
         if s.startswith("SPREAD"):
@@ -219,12 +121,13 @@ class MonteCarloTreeSearch():
         max_ucb_hash = ""
         for (action, child_hash) in parent["children"]:
             if child_hash == None:
+                # Apply action to parent board
                 temp_board = self.unhash(parent_hash)
                 temp_board._turn_color = PlayerColor.RED if parent["is_red_turn"] else PlayerColor.BLUE
                 temp_board.apply_action(self.unhash_action(action))
-                # update child hash
+
+                # Update Child Node
                 child_hash = self.hash(temp_board)
-                # update child node
                 self.tree[parent_hash]["children"].remove((action, None))
                 self.tree[parent_hash]["children"].append((action, child_hash))
                 # print(f"  Selecting child {child_hash} with action {str(action)}")
@@ -232,19 +135,29 @@ class MonteCarloTreeSearch():
 
             child = self.tree[child_hash]
 
+            # UCB Comparison
             if child["ucb"] >= max_ucb and child_hash not in self.tree[parent_hash]["parents"]:
                 max_ucb = child["ucb"]
                 max_ucb_hash = child_hash
         return self.selection(max_ucb_hash)
     
     def expansion(self, parent_hash: str, child_hash: str):
-        # Create the new child node and add to the tree
-        # print(f"  Expanding child {child_hash}")
-        is_red_turn = True if parent_hash in ["None", None] else not self.tree[parent_hash]["is_red_turn"]
-        actions: list[Action] = find_possible_actions(self.unhash(child_hash), PlayerColor.RED if is_red_turn else PlayerColor.BLUE, 2)
-        hashed_children = [(str(a), None) for a in actions]
+        """
+        Expand the tree by creating and adding a new child node to the parent node. The child node is created with its possible actions.
 
+        Arguments:
+        parent_hash -- the hash of the parent node
+        child_hash -- the hash of the child node
+
+        Returns:
+        None
+        """
+        # Only create the child node if it does not already exist
         if child_hash not in self.tree:
+            # Create the new child node with its possible actions and add to the tree
+            is_red_turn = True if parent_hash in ["None", None] else not self.tree[parent_hash]["is_red_turn"]
+            actions: list[Action] = find_possible_actions(self.unhash(child_hash), PlayerColor.RED if is_red_turn else PlayerColor.BLUE, 2)
+            hashed_children = [(str(a), None) for a in actions]
             self.tree[child_hash] = {
                 "wins": 0,
                 "visits": 0,
@@ -254,43 +167,54 @@ class MonteCarloTreeSearch():
                 "is_red_turn": is_red_turn
             }
         else:
+            # Add the parent to the existing child's list of parents
             self.tree[child_hash]["parents"].append(parent_hash)
         # self.print_tree()
 
-    
+    def simulation(self, child_hash: str, player: PlayerColor, minimax=False) -> float:
+        """
+        Simulate a game from the given child node until a terminal state is reached. Return the reward of the terminal state.
 
-    def simulation(self, child_hash: str, player: PlayerColor, minimax=False):
-        # possible optimisation: evaluation function for every move
+        Arguments:
+            child_hash -- the hash of the child node
+            player -- the player to simulate for
+
+        Returns:
+            The reward of the terminal state
+            * 0.5 for a draw
+            * 1 for a win
+            * 0 for a loss
+        """
+        # Create a temporary board from the child node
         b = self.unhash(child_hash)
         temp_board = Board(b._state)
         temp_board._turn_color = PlayerColor.RED if self.tree[child_hash]["is_red_turn"] else PlayerColor.BLUE
-        # new_action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, None))
-        # temp_board.apply_action(new_action) # apply the first random action
-        # new_child_hash = self.hash(temp_board)
-        # children = find_possible_actions(temp_board, temp_board._turn_color, None)
-        # self.tree[new_child_hash] = {
-        #     "wins": 0,
-        #     "visits": 0,
-        #     "ucb": 0,
-        #     "children": children,
-        #     "parents": [parent]
-        # }
 
         # Simulate play from that new state
         while not temp_board.game_over:
             # print(f"Game Over: {temp_board.game_over}")
-            minimaxAgent = Minimax(temp_board._turn_color)
-            action, cost = minimaxAgent.minimax(temp_board, 3, True, float('-inf'), float('inf'))
-            # action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, 2))
 
-            print(str(action))
+            if minimax:
+                # Using minimax agent for simulation
+                minimaxAgent = MinimaxAgent(temp_board._turn_color)
+                action, cost = minimaxAgent.minimax(temp_board, 3, True, float('-inf'), float('inf'))
+            else:
+                # Using random agent for simulation
+                action = random.choice(find_possible_actions(temp_board, temp_board._turn_color, 2))
+            
+            # Apply the action to the temporary board
             temp_board.apply_action(action)
-            print(temp_board.render())
+            # print(str(action))
+            # print(temp_board.render())
+        
         if temp_board.winner_color == None:
+            # Draw
             return 0.5
         elif temp_board.winner_color == player:
+            # Win
             return 1
         else:
+            # Lost
             return 0
     
     def backpropagation(self, isWin: int, child_hash: str, visited: list[str]=[]):
@@ -381,62 +305,59 @@ class MonteCarloTreeSearch():
 
         # self.print_tree()
 
-def get_tree_from_csv(filename):
-    tree = {}
-    try:
-        fp = open(filename, "r", newline="")
-        reader = csv.DictReader(fp)
+    def get_tree_from_csv(self, filename):
+        """
+        
+        """
+        tree = {}
+        try:
+            fp = open(filename, "r", newline="")
+            reader = csv.DictReader(fp)
 
-        # Converting string representation of children to list of tuples
-        for row in reader:
-            children = []
-            for c in row["children"].strip("[]").split("), ("):
-                if "None" in c:
-                    c = c.strip("()").replace("'", "")
-                    action = c.strip(", None")
-                    children.append((action, None))
-                else:
-                    c = c.strip("()").split("', '")
-                    c = [ele.replace("'", "") for ele in c]
-                    children.append(tuple(c))
-            tree[row["hash"]] = {
-                "wins": float(row["wins"]),
-                "visits": float(row["visits"]),
-                "ucb": float(row["ucb"]),
-                "children": children,
-                "parents": [p.strip("''") for p in row["parents"].strip("[]").split("', '")],
-                "is_red_turn": True if row["is_red_turn"] == "True" else False
-            }
-        fp.close()
-    except FileNotFoundError:
-        # Creating new tree
-        print("File not found. Creating new tree.")
+            # Converting string representation of children to list of tuples
+            for row in reader:
+                children = []
+                for c in row["children"].strip("[]").split("), ("):
+                    if "None" in c:
+                        c = c.strip("()").replace("'", "")
+                        action = c.strip(", None")
+                        children.append((action, None))
+                    else:
+                        c = c.strip("()").split("', '")
+                        c = [ele.replace("'", "") for ele in c]
+                        children.append(tuple(c))
+                tree[row["hash"]] = {
+                    "wins": float(row["wins"]),
+                    "visits": float(row["visits"]),
+                    "ucb": float(row["ucb"]),
+                    "children": children,
+                    "parents": [p.strip("''") for p in row["parents"].strip("[]").split("', '")],
+                    "is_red_turn": True if row["is_red_turn"] == "True" else False
+                }
+            fp.close()
+        except FileNotFoundError:
+            # Creating new tree
+            print("File not found. Creating new tree.")
+            fp = open(filename, "w", newline="")
+            writer = csv.DictWriter(fp, fieldnames=["hash", "wins", "visits", "ucb", "children", "parents", "is_red_turn"])
+            writer.writeheader()
+            fp.close()
+        return tree
+
+    def save_tree_to_csv(self, tree, filename):
+        """
+        Save tree to csv file.
+
+        Arguments:
+            tree: dictionary representation of tree
+            filename: name of csv file
+        """
         fp = open(filename, "w", newline="")
-        writer = csv.DictWriter(fp, fieldnames=["hash", "wins", "visits", "ucb", "children", "parents", "is_red_turn"])
-        writer.writeheader()
+        writer = csv.writer(fp)
+        writer.writerow(["hash", "wins", "visits", "ucb", "children", "parents", "is_red_turn"])
+        for key, value in self.tree.items():
+            writer.writerow([key, value["wins"], value["visits"], value["ucb"], value["children"], value["parents"], value["is_red_turn"]])
         fp.close()
-    return tree
 
-NUM_ITERATIONS = 100
-MINIMAX = False
-FILENAME = "test2.csv"
-def main():
+
     
-    # Try to read existing tree from csv file - create new tree is csv file does not exist
-    
-
-    i = 0
-    # while True:
-    print(f"\n===================== Iteration {i} ==============================")
-    i += 1
-    mcts = MonteCarloTreeSearch({})
-    mcts.mcts(NUM_ITERATIONS, MINIMAX, mcts.unhash("00B1,61R1"))
-    # mcts.print_tree()
-
-    # Save tree to csv file
-    fp = open(FILENAME, "w", newline="")
-    writer = csv.writer(fp)
-    writer.writerow(["hash", "wins", "visits", "ucb", "children", "parents", "is_red_turn"])
-    for key, value in mcts.tree.items():
-        writer.writerow([key, value["wins"], value["visits"], value["ucb"], value["children"], value["parents"], value["is_red_turn"]])
-    fp.close()

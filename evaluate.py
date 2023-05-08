@@ -1,6 +1,11 @@
+"""
+Runs multiple games between two agents and prints out the win percentage of each agent as well as the average number of moves per game.
+
+Usage: `python -m evaluate`
+"""
+
 import subprocess
 
-# Run multiple games between red and blue
 red_wins = 0
 blue_wins = 0
 total_num_moves = 0
@@ -9,11 +14,11 @@ NUM_GAMES = 100
 for i in range(NUM_GAMES):
     print(f"Game {i}")
     num_moves = 0
-    # Create a child subprocess that runs the referee
+    # Create a child subprocess that runs the referee command
     p = subprocess.Popen("python -m referee agent agent -c", shell="True", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     for line in p.stdout.readlines():
         line = line.decode("utf-8") 
-        print(line, end="")
+        # print(line, end="") # Uncomment if you want to view the game play
         if "game board" in line:
             num_moves += 1
         if "winner" in line:

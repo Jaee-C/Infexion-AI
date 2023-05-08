@@ -4,6 +4,8 @@ from referee.game.constants import BOARD_N, MAX_TOTAL_POWER
 from referee.game.hex import HexDir, HexPos
 from referee.game.player import PlayerColor
 
+import random
+
 
 def find_possible_actions(b: Board, c: PlayerColor, spawn_limit: int=3) -> list[Action]:
         possible_actions: list[Action] = find_spread_actions(b, 
@@ -50,7 +52,7 @@ def find_spawn_actions(b, limit=3) -> list[Action]:
                 new_action = SpawnAction(HexPos(i, j))
                 action_list.append(new_action)
 
-    # only return the first action for now -- add a new more spawn options otherwise insta win
+    random.shuffle(action_list)
     if limit == None:
         return action_list
     return action_list[0:limit]
