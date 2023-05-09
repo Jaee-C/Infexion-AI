@@ -1,9 +1,9 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part B: Game Playing Agent
 
-from agent.minimax import MinimaxAgent
+from .minimax import MinimaxAgent
 from referee.game import \
-    PlayerColor, Action, SpawnAction, SpreadAction
+    PlayerColor, Action
 from .board import Board
 
 MAX_DEPTH = 3

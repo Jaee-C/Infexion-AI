@@ -1,7 +1,7 @@
 from argparse import Action
-from agent.board import Board
-from agent.transposition import Transposition
-from agent.utils import find_possible_actions
+from .board import Board
+from .transposition import Transposition
+from .utils import find_possible_actions
 from referee.game.player import PlayerColor
 
 class MinimaxAgent():

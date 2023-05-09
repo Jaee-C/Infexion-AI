@@ -1,8 +1,8 @@
 import random
 import math
 import csv
-from agent.minimax import MinimaxAgent
-from agent.board import Board
+from .minimax import MinimaxAgent
+from .board import Board
 from referee.game.actions import Action, SpawnAction, SpreadAction
 from referee.game.board import CellState
 from referee.game.constants import BOARD_N

@@ -1,7 +1,7 @@
 from argparse import Action
 import random
-from agent.board import Board
-from agent.utils import find_possible_actions
+from .board import Board
+from .utils import find_possible_actions
 from referee.game.player import PlayerColor
 
 class RandomAgent():
