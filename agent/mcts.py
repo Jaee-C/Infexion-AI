@@ -2,8 +2,9 @@ import random
 import math
 import csv
 from agent.minimax import MinimaxAgent
+from agent.board import Board
 from referee.game.actions import Action, SpawnAction, SpreadAction
-from referee.game.board import Board, CellState
+from referee.game.board import CellState
 from referee.game.constants import BOARD_N
 from referee.game.hex import HexDir, HexPos, HexVec
 from referee.game.player import PlayerColor
@@ -257,7 +258,7 @@ class MCTSAgent():
             if parent_hash == None or parent_hash == "None":
                 continue
             # Prevent infinite recursion if parent is a child of the current node
-            # child_hashes = [c for (_, c) in self.tree[parent_hash]["parents"]]
+            child_hashes = [c for (_, c) in self.tree[parent_hash]["parents"]]
             # print(child_hashes)
             # print(parent_hash)
             if parent_hash in visited:
@@ -265,8 +266,8 @@ class MCTSAgent():
                 continue
 
             # Update Parent's Wins and Visits
-            # self.tree[parent_hash]["wins"] += isWin
-            # self.tree[parent_hash]["visits"] += 1
+            self.tree[parent_hash]["wins"] += isWin
+            self.tree[parent_hash]["visits"] += 1
 
             # Recursively backpropagate
             # self.print_tree()

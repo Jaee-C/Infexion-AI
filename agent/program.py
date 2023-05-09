@@ -5,7 +5,6 @@ from agent.minimax import MinimaxAgent
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction
 from .board import Board
-from .transposition import Transposition
 
 MAX_DEPTH = 3
 
@@ -22,37 +21,22 @@ class Agent:
         """
         self._color = color
         self._state: Board = Board()
-        
         match color:
             case PlayerColor.RED:
-                print("Testing: I am playing as red")
                 self.opponent = PlayerColor.BLUE
             case PlayerColor.BLUE:
                 self.opponent = PlayerColor.RED
-                print("Testing: I am playing as blue")
+        self._agent = MinimaxAgent(self._color, "eval_func1")
 
     def action(self, **referee: dict) -> Action:
         """
         Return the next action to take.
         """
-        match self._color:
-            case PlayerColor.RED:
-                minimax_agent_1 = MinimaxAgent(self._color, "eval_func1")
-                action, cost = minimax_agent_1.minimax(self._state, 3, True, float('-inf'), float('inf'))
-                return action
-            case PlayerColor.BLUE:
-                minimax_agent_2 = MinimaxAgent(self._color, "eval_func2")
-                action, cost = minimax_agent_2.minimax(self._state, 3, True, float('-inf'), float('inf'))
-                return action
-
+        action, _ = self._agent.minimax(self._state, MAX_DEPTH, True, float('-inf'), float('inf'))
+        return action
+    
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
         """
         Update the agent's state with the last player's action.
         """
-        match action:
-            case SpawnAction(cell):
-                self._state.apply_action(action)
-            case SpreadAction(cell, direction):
-                self._state.apply_action(action)
-
-    
+        self._state.apply_action(action)
